@@ -23,7 +23,7 @@ namespace DlaGrzesia
         private Textures textures;
         private Point stageSize = new Point(1000, 700);
         private List<IObject> objects = new List<IObject>();
-        private List<IObject> uiElements = new List<IObject>();
+        private readonly List<IObject> uiElements = new List<IObject>();
         private readonly InputManager inputManager = new InputManager();
         private bool includeDebugData = false;
         private Point stageLocation = new Point(15, 15);
@@ -31,6 +31,8 @@ namespace DlaGrzesia
         private ParticleGenerator heartsGenerator;
         private Score score = new Score(0);
         private readonly CyclicList<IEnumerable<Keys>> pressedKeys = new CyclicList<IEnumerable<Keys>>(12, Array.Empty<Keys>());
+        private IReadOnlyList<UpgradeState> upgrades;
+        private MoneyDebugInput moneyDebugInput = new MoneyDebugInput();
 
         private Rectangle StageBounds => new Rectangle(stageLocation, stageSize);
 
@@ -44,6 +46,18 @@ namespace DlaGrzesia
         protected override void Initialize()
         {
             base.Initialize();
+
+            upgrades = new List<UpgradeState>
+            {
+                new UpgradeState(1),
+                new UpgradeState(10),
+                new UpgradeState(100),
+                new UpgradeState(500),
+                new UpgradeState(1000),
+                new UpgradeState(4000),
+                new UpgradeState(10000),
+                new UpgradeState(100000)
+            };
         }
 
         protected override void LoadContent()
@@ -54,21 +68,15 @@ namespace DlaGrzesia
             textures = resourcesLoader.Load<Textures>();
             fonts = resourcesLoader.Load<Fonts>();
 
-            var displayLocation = new Point(StageBounds.Right + 30, 30);
-            var scoreDisplay = new ScoreDisplay(textures.Hearts, fonts.Font, displayLocation);
-            uiElements.Add(scoreDisplay);
-
             _graphics.PreferredBackBufferWidth = textures.UIBackground.Width;
             _graphics.PreferredBackBufferHeight = textures.UIBackground.Height;
             _graphics.ApplyChanges();
 
-            heartsGenerator = new ParticleGenerator(new ParticlePrototype(textures.Heart, new Point(0, -3), 24));
+            heartsGenerator = new ParticleGenerator(textures.Heart);
             objects.Add(heartsGenerator);
             objects.Add(new PenguinGenerator(textures, fonts, heartsGenerator));
 
-            var avatarLocation = new Point(StageBounds.Right - textures.Grzesiek.TileSize.X, StageBounds.Bottom + 15);
-            var avatarDisplay = new AvatarDisplay(textures.Grzesiek, textures.DOG, fonts.Font, avatarLocation);
-            uiElements.Add(avatarDisplay);
+            InitializeUI();
         }
 
         protected override void UnloadContent()
@@ -84,6 +92,8 @@ namespace DlaGrzesia
             if (inputInfo.JustPressedKeys.Any())
                 pressedKeys.Write(inputInfo.JustPressedKeys);
 
+            var gameSaved = false;
+
             if (inputInfo.Keyboard.IsKeyDown(Keys.LeftControl))
             {
                 if (inputInfo.IsKeyJustPressed(Keys.D))
@@ -95,6 +105,7 @@ namespace DlaGrzesia
                     var repository = new GameStateRepository();
                     var state = new GameState(objects.OfType<ISerializable>().ToList(), score.Total);
                     repository.Save(state);
+                    gameSaved = true;
                 }
                 else if (inputInfo.IsKeyJustPressed(Keys.P))
                 {
@@ -105,9 +116,24 @@ namespace DlaGrzesia
                     var repository = new GameStateRepository();
                     TryLoadGame();
                 }
+                else if (inputInfo.IsKeyJustPressed(Keys.M))
+                {
+                    moneyDebugInput.Activate(score);
+                }    
             }
 
-            var environmentState = new EnvironmentState(StageBounds, inputInfo, score);
+            var events = new Events(gameSaved);
+            var upgradeStates = upgrades.Select(x => x.ToFrameState()).ToList();
+
+            var environmentState = new EnvironmentState(
+                StageBounds, 
+                inputInfo, 
+                score, 
+                events, 
+                new Upgrades(upgradeStates), 
+                moneyDebugInput,
+                heartsGenerator);
+
             var nextObjects = new List<IObject>(objects.Count);
 
             if (!paused)
@@ -134,6 +160,13 @@ namespace DlaGrzesia
 
             score.Update();
 
+            foreach (var boughtUpgrade in environmentState.Upgrades.BoughtUpgrades)
+                upgrades[boughtUpgrade].LevelUp();
+
+            moneyDebugInput.Update(inputInfo);
+            if (moneyDebugInput.NewScore != null)
+                score = moneyDebugInput.NewScore;
+
             base.Update(gameTime);
         }
 
@@ -143,8 +176,8 @@ namespace DlaGrzesia
 
             var modifiers = new DrawingModifiers(includeDebugData);
 
-            _spriteBatch.Begin();
-            _spriteBatch.Draw(textures.Stage, stageLocation.ToVector2(), Color.White);
+            _spriteBatch.Begin(sortMode: SpriteSortMode.BackToFront);
+            _spriteBatch.Draw(textures.Stage, stageLocation.ToVector2(), null, Color.White, 0, default, 1f, SpriteEffects.None, LayerDepths.StageBackground);
 
             foreach (var @object in objects)
                 @object.Draw(gameTime, _spriteBatch, modifiers);
@@ -176,7 +209,7 @@ namespace DlaGrzesia
                 }
             }
 
-            _spriteBatch.Draw(textures.UIBackground, Vector2.Zero, Color.White);
+            _spriteBatch.Draw(textures.UIBackground, Vector2.Zero, null, Color.White, 0, default, 1f, SpriteEffects.None, LayerDepths.UIBackground);
 
             foreach (var element in uiElements)
                 element.Draw(gameTime, _spriteBatch, modifiers);
@@ -209,6 +242,21 @@ namespace DlaGrzesia
             yield return new SlidingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
             yield return new SurfingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
             yield return new WalkingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
+        }
+
+        private void InitializeUI()
+        {
+            var scoreLocation = new Point(StageBounds.Right + 30, 30);
+            var scoreDisplay = new ScoreDisplay(textures.Hearts, fonts.Font, scoreLocation);
+            uiElements.Add(scoreDisplay);
+
+            var avatarLocation = new Point(StageBounds.Right - textures.Grzesiek.TileSize.X, StageBounds.Bottom + 15);
+            var avatarDisplay = new AvatarDisplay(textures.Grzesiek, textures.DOG, fonts.Font, avatarLocation);
+            uiElements.Add(avatarDisplay);
+
+            var upgradesGrid = new UpgradesGrid(new Point(1045, 150), new Point(270, 150), 2, new Point(30, 30));
+            uiElements.Add(new UpgradeDisplay(textures.Alex, fonts.Font, upgradesGrid.GetIndexBounds(0), 0));
+            uiElements.Add(new UpgradeDisplay(textures.Kamil, fonts.Font, upgradesGrid.GetIndexBounds(1), 1));
         }
     }
 }

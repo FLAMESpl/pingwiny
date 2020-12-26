@@ -1,4 +1,4 @@
-﻿using DlaGrzesia.Objects.Actors;
+﻿using DlaGrzesia.Assets;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -7,11 +7,11 @@ namespace DlaGrzesia.Objects.Particles
 {
     public class ParticleGenerator : IObject, IGenerator
     {
-        private readonly ParticlePrototype particlePrototype;
+        private readonly Tileset tileset;
 
-        public ParticleGenerator(ParticlePrototype particlePrototype)
+        public ParticleGenerator(Tileset tileset)
         {
-            this.particlePrototype = particlePrototype;
+            this.tileset = tileset;
         }
 
         public bool Expired { get; set; }
@@ -26,9 +26,9 @@ namespace DlaGrzesia.Objects.Particles
         {
         }
 
-        public void Spawn(Point position)
+        public void Spawn(ParticlePrototype prototype)
         {
-            var particle = new Particle(particlePrototype, position);
+            var particle = new Particle(tileset, prototype);
             SpawnedObjects.Enqueue(particle);
         }
     }

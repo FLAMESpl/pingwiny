@@ -10,6 +10,7 @@ namespace DlaGrzesia.Objects.UI
         private readonly Point location;
         private readonly int distanceBetweenTextAndImage = 20;
         private int points;
+        private string debugPoints;
 
         public ScoreDisplay(Texture2D texture, SpriteFont font, Point location)
         {
@@ -22,13 +23,18 @@ namespace DlaGrzesia.Objects.UI
 
         public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
         {
-            spriteBatch.Draw(texture, location.ToVector2(), Color.White);
-            spriteBatch.DrawString(font, points.ToString(), GetTextLocation(), Color.Black);
+            spriteBatch.Draw(texture, location.ToVector2(), null, Color.White, 0, default, 1f, SpriteEffects.None, LayerDepths.UI);
+
+            if (string.IsNullOrWhiteSpace(debugPoints))
+                spriteBatch.DrawString(font, points.ToString(), GetTextLocation(), Color.Black);
+            else
+                spriteBatch.DrawString(font, debugPoints, GetTextLocation(), Color.DarkMagenta);
         }
 
         public void Update(GameTime elapsed, EnvironmentState environmentState)
         {
             points = environmentState.Score.Total;
+            debugPoints = environmentState.MoneyDebugInput.CurrentMoneyString;
         }
 
         private Vector2 GetTextLocation() => new Vector2(

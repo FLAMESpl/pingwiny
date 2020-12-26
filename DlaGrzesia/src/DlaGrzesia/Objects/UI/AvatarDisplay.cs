@@ -16,6 +16,7 @@ namespace DlaGrzesia.Objects.UI
         private readonly KonamiCodeSequence konamiCode = new KonamiCodeSequence();
         private Counter dogDuration = Counter.NewElapsed();
         private Counter dogFrameDuration = Counter.NewStarted(3).ToCyclic();
+        private Counter safeShutdownDuration = Counter.NewElapsed(150);
 
         public AvatarDisplay(Tileset tileset, Tileset dogTileset, SpriteFont font, Point location)
         {
@@ -29,13 +30,17 @@ namespace DlaGrzesia.Objects.UI
 
         public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
         {
-            if (dogDuration.Elapsed)
+            if (!safeShutdownDuration.Elapsed)
             {
-                spriteBatch.Draw(tileset, location, 0);
+                spriteBatch.Draw(tileset, location, 1, LayerDepths.UI);
+            }
+            else if (!dogDuration.Elapsed)
+            {
+                spriteBatch.Draw(dogTileset, location, dogDuration.CurrentValueReversed, LayerDepths.UI);
             }
             else
             {
-                spriteBatch.Draw(dogTileset, location, dogDuration.CurrentValueReversed);
+                spriteBatch.Draw(tileset, location, 0, LayerDepths.UI);
             }
 
             if (modifiers.IncludeDebugData)
@@ -55,6 +60,8 @@ namespace DlaGrzesia.Objects.UI
                     dogDuration.Tick();
             }
 
+            safeShutdownDuration = safeShutdownDuration.Tick();
+
             if (environmentState.Input.JustPressedKeys.Count == 1)
             {
                 var pressedKey = environmentState.Input.JustPressedKeys.SingleOrDefault();
@@ -62,6 +69,11 @@ namespace DlaGrzesia.Objects.UI
                 {
                     dogDuration = Counter.NewStarted(dogTileset.TilesCount);
                 }
+            }
+
+            if (environmentState.Events.GameSaved)
+            {
+                safeShutdownDuration = safeShutdownDuration.Reset();
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using DlaGrzesia.Mechanics;
+﻿using DlaGrzesia.Assets;
+using DlaGrzesia.Mechanics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -6,14 +7,16 @@ namespace DlaGrzesia.Objects.Particles
 {
     public class Particle : IObject
     {
+        private readonly Tileset tileset;
         private readonly ParticlePrototype prototype;
         private Point location;
         private Counter age;
 
-        public Particle(ParticlePrototype prototype, Point location)
+        public Particle(Tileset tileset, ParticlePrototype prototype)
         {
+            this.tileset = tileset;
             this.prototype = prototype;
-            this.location = location;
+            location = prototype.Position;
             age = Counter.NewStarted(prototype.Lifetime);
         }
 
@@ -21,7 +24,7 @@ namespace DlaGrzesia.Objects.Particles
 
         public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
         {
-            spriteBatch.Draw(prototype.Texture, location.ToVector2(), Color.White);
+            spriteBatch.Draw(tileset, location, prototype.TileIndex);
         }
 
         public void Update(GameTime elapsed, EnvironmentState environmentState)

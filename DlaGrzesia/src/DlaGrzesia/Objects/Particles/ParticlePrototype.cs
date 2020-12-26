@@ -1,21 +1,24 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using DlaGrzesia.Assets;
+using Microsoft.Xna.Framework;
 
 namespace DlaGrzesia.Objects.Particles
 {
     public class ParticlePrototype
     {
         public ParticlePrototype(
-            Texture2D texture,
+            int tileIndex,
+            Point position,
             Point speed,
             int lifetime)
         {
-            Texture = texture;
+            TileIndex = tileIndex;
+            Position = position;
             Speed = speed;
             Lifetime = lifetime;
         }
 
-        public Texture2D Texture { get; }
+        public int TileIndex { get; }
+        public Point Position { get; }
         public Point Speed { get; }
         public int Lifetime { get; }
     }

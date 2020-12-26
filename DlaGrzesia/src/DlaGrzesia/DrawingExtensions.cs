@@ -35,11 +35,50 @@ namespace DlaGrzesia
             Tileset tileset,
             Point location,
             int index,
+            float layer = 0,
             Color? color = null)
         {
             color ??= Color.White;
             var tile = tileset.GetTile(index);
-            batch.Draw(tile.Texture, location.ToVector2(), tile.Source, color.Value);
+            batch.Draw(
+                tile.Texture, 
+                location.ToVector2(), 
+                tile.Source, 
+                color.Value, 
+                0, 
+                Vector2.Zero, 
+                Vector2.One, 
+                SpriteEffects.None, 
+                layer);
+        }
+        public static void DrawCenteredString(
+            this SpriteBatch batch,
+            SpriteFont font,
+            string text,
+            Point location,
+            Color color,
+            float scale = 1,
+            float layerDepth = 0)
+        {
+            var size = font.MeasureString(text) * scale;
+            var position = location.ToVector2() - size / 2;
+
+            batch.DrawString(font, text, position, color, 0, default, scale, SpriteEffects.None, layerDepth);
+        }
+
+        public static void DrawStringAlignedToLeft(
+            this SpriteBatch batch,
+            SpriteFont font,
+            string text,
+            Point location,
+            Color color,
+            float scale = 1,
+            float layerDepth = 0)
+        {
+            var size = font.MeasureString(text) * scale;
+            var position = location.ToVector2() - size * Vector2.UnitX;
+
+            batch.DrawString(font, text, position, color, 0, default, scale, SpriteEffects.None, layerDepth);
         }
 
         public static void DrawStringCoordinates(

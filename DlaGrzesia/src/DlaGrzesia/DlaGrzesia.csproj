@@ -14,6 +14,7 @@
     <None Remove="Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\assets\Alex.tga" Link="Content\Alex.tga" />
     <Content Include="..\..\assets\DOG.0.tga" Link="Content\DOG.0.tga" />
     <Content Include="..\..\assets\DOG.1.tga" Link="Content\DOG.1.tga" />
     <Content Include="..\..\assets\DOG.10.tga" Link="Content\DOG.10.tga" />
@@ -33,6 +34,7 @@
     <Content Include="..\..\assets\Grzesiek.tga" Link="Content\Grzesiek.tga" />
     <Content Include="..\..\assets\Heart.tga" Link="Content\Heart.tga" />
     <Content Include="..\..\assets\Hearts.tga" Link="Content\Hearts.tga" />
+    <Content Include="..\..\assets\Kamil.tga" Link="Content\Kamil.tga" />
     <Content Include="..\..\assets\PenguinSliding.tga" Link="Content\PenguinSliding.tga" />
     <Content Include="..\..\assets\PenguinWalking.tga" Link="Content\PenguinWalking.tga" />
     <Content Include="..\..\assets\PenguinWithBoard.tga" Link="Content\PenguinWithBoard.tga" />

@@ -44,7 +44,7 @@ namespace DlaGrzesia.Objects.Actors
 
         public void Draw(SpriteBatch batch, DrawingModifiers modifiers, int tilesetIndex)
         {
-            batch.Draw(tileset, Location, tilesetIndex);
+            batch.Draw(tileset, Location, tilesetIndex, LayerDepths.Actors);
             if (modifiers.IncludeDebugData)
             {
                 batch.DrawStringCoordinates(font, Location);
@@ -53,11 +53,11 @@ namespace DlaGrzesia.Objects.Actors
                     remainingDuration.ToString(), 
                     new Vector2(Bounds.Right, Bounds.Top),
                     Color.Red,
-                    0,
+                    default,
                     default,
                     0.5f,
                     SpriteEffects.None,
-                    0);
+                    default);
             }
         }
 
@@ -71,19 +71,18 @@ namespace DlaGrzesia.Objects.Actors
                 {
                     Expired = true;
                     environmentState.Score.Increase(scorePerDestroy);
+                    generator.Spawn(new HeartsParticle(true, Location));
                 }
                 else
                 {
                     environmentState.Score.Increase(scorePerClick);
+                    generator.Spawn(new HeartsParticle(false, Location));
                 }
-
-                generator.Spawn(Location);
             }
             
             if (environmentState.StageBounds.Intersects(Bounds) == false)
             {
                 Expired = true;
-
             }
         }
 

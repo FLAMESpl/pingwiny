@@ -6,8 +6,8 @@ namespace DlaGrzesia
 {
     public class Textures : IDisposable
     {
-        [Resource]
-        public Texture2D Heart { get; private set; }
+        [Tileset(35, 32)]
+        public Tileset Heart { get; private set; }
 
         [Resource]
         public Texture2D Hearts { get; private set; }
@@ -33,6 +33,12 @@ namespace DlaGrzesia
         [Tileset(150, 150, 16)]
         public Tileset DOG { get; private set; }
 
+        [Tileset(150, 150)]
+        public Tileset Alex { get; private set; }
+
+        [Tileset(150, 150)]
+        public Tileset Kamil { get; private set; }
+
         public void Dispose()
         {
             Heart?.Dispose();
@@ -44,6 +50,8 @@ namespace DlaGrzesia
             UIBackground?.Dispose();
             Grzesiek?.Dispose();
             DOG?.Dispose();
+            Alex?.Dispose();
+            Kamil?.Dispose();
         }
     }
 }
