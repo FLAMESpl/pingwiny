@@ -362,6 +362,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 publish/
-DlaGrzesia/assets/
+DlaGrzesia/assets/*
+!DlaGrzesia/assets/.gitkeep
 DlaGrzesia/src/DlaGrzesia/Content/bin/
 DlaGrzesia/src/DlaGrzesia/Content/obj/
