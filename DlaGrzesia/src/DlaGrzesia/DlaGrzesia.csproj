@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <TieredCompilation>false</TieredCompilation>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Icon.ico" />
+    <None Remove="Icon.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\assets\DOG.0.tga" Link="Content\DOG.0.tga" />
+    <Content Include="..\..\assets\DOG.1.tga" Link="Content\DOG.1.tga" />
+    <Content Include="..\..\assets\DOG.10.tga" Link="Content\DOG.10.tga" />
+    <Content Include="..\..\assets\DOG.11.tga" Link="Content\DOG.11.tga" />
+    <Content Include="..\..\assets\DOG.12.tga" Link="Content\DOG.12.tga" />
+    <Content Include="..\..\assets\DOG.13.tga" Link="Content\DOG.13.tga" />
+    <Content Include="..\..\assets\DOG.14.tga" Link="Content\DOG.14.tga" />
+    <Content Include="..\..\assets\DOG.15.tga" Link="Content\DOG.15.tga" />
+    <Content Include="..\..\assets\DOG.2.tga" Link="Content\DOG.2.tga" />
+    <Content Include="..\..\assets\DOG.3.tga" Link="Content\DOG.3.tga" />
+    <Content Include="..\..\assets\DOG.4.tga" Link="Content\DOG.4.tga" />
+    <Content Include="..\..\assets\DOG.5.tga" Link="Content\DOG.5.tga" />
+    <Content Include="..\..\assets\DOG.6.tga" Link="Content\DOG.6.tga" />
+    <Content Include="..\..\assets\DOG.7.tga" Link="Content\DOG.7.tga" />
+    <Content Include="..\..\assets\DOG.8.tga" Link="Content\DOG.8.tga" />
+    <Content Include="..\..\assets\DOG.9.tga" Link="Content\DOG.9.tga" />
+    <Content Include="..\..\assets\Grzesiek.tga" Link="Content\Grzesiek.tga" />
+    <Content Include="..\..\assets\Heart.tga" Link="Content\Heart.tga" />
+    <Content Include="..\..\assets\Hearts.tga" Link="Content\Hearts.tga" />
+    <Content Include="..\..\assets\PenguinSliding.tga" Link="Content\PenguinSliding.tga" />
+    <Content Include="..\..\assets\PenguinWalking.tga" Link="Content\PenguinWalking.tga" />
+    <Content Include="..\..\assets\PenguinWithBoard.tga" Link="Content\PenguinWithBoard.tga" />
+    <Content Include="..\..\assets\Stage.tga" Link="Content\Stage.tga" />
+    <Content Include="..\..\assets\UIBackground.tga" Link="Content\UIBackground.tga" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icon.ico" />
+    <EmbeddedResource Include="Icon.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <MonoGameContentReference Include="Content\Content.mgcb" />
+  </ItemGroup>
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Microsoft.Xna.Framework.Content.ContentTypeReader" Visible="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
+    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1641" />
+  </ItemGroup>
+</Project>
