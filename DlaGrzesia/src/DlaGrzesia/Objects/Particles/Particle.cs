@@ -24,7 +24,8 @@ namespace DlaGrzesia.Objects.Particles
 
         public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
         {
-            spriteBatch.Draw(tileset, location, prototype.TileIndex);
+            var color = modifiers.IsGamePaused ? Color.DarkSlateGray : Color.White;
+            spriteBatch.Draw(tileset, location, prototype.TileIndex, color: color);
         }
 
         public void Update(GameTime elapsed, EnvironmentState environmentState)

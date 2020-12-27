@@ -1,4 +1,5 @@
 ﻿using DlaGrzesia.Assets;
+using DlaGrzesia.Mechanics;
 using DlaGrzesia.Objects.Particles;
 using DlaGrzesia.Upgrades;
 using Microsoft.Xna.Framework;
@@ -13,6 +14,7 @@ namespace DlaGrzesia.Objects.UI
         private readonly Rectangle bounds;
         private Upgrade info;
         private bool canAfford = false;
+        private Counter justBoughtDuration = Counter.NewElapsed(48);
 
         public UpgradeDisplay(Tileset tileset, SpriteFont font, Rectangle bounds, int index)
         {
@@ -38,7 +40,8 @@ namespace DlaGrzesia.Objects.UI
             }
             else
             {
-                spriteBatch.Draw(tileset, bounds.Location, 0, LayerDepths.UI);
+                var tileIndex = modifiers.IsGamePaused ? 2 : justBoughtDuration.Elapsed ? 0 : 1;
+                spriteBatch.Draw(tileset, bounds.Location, tileIndex, LayerDepths.UI);
                 spriteBatch.DrawStringAlignedToLeft(font, info.Price.ToString(), PriceLocation, priceColor, 0.5f, LayerDepths.UI);
                 spriteBatch.DrawCenteredString(font, info.Count.ToString(), CountLocation, Color.Black, 1, LayerDepths.UI);
             }
@@ -49,11 +52,17 @@ namespace DlaGrzesia.Objects.UI
             info = environmentState.Upgrades[Index];
             canAfford = environmentState.Score.Affordable(info.Price);
 
-            if (canAfford && environmentState.Input.TryConsumeLeftMouseButtonClick(bounds))
+            if (!environmentState.IsGamePaused)
             {
-                environmentState.Score.Spend(info.Price);
-                environmentState.Upgrades.Buy(Index);
-                environmentState.HeartsGenerator.Spawn(new HeartsParticle(false, environmentState.Input.Mouse.Position));
+                justBoughtDuration = justBoughtDuration.Tick();
+
+                if (canAfford && environmentState.Input.TryConsumeLeftMouseButtonClick(bounds))
+                {
+                    environmentState.Score.Spend(info.Price);
+                    environmentState.Upgrades.Buy(Index);
+                    environmentState.HeartsGenerator.Spawn(new HeartsParticle(false, environmentState.Input.Mouse.Position));
+                    justBoughtDuration = justBoughtDuration.Reset();
+                }
             }
         }
     }

@@ -135,7 +135,8 @@ namespace DlaGrzesia
                 events, 
                 new UpgradesCollection(upgradeStates), 
                 moneyDebugInput,
-                heartsGenerator);
+                heartsGenerator,
+                paused);
 
             var nextObjects = new List<IObject>(objects.Count);
 
@@ -177,10 +178,11 @@ namespace DlaGrzesia
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            var modifiers = new DrawingModifiers(includeDebugData);
+            var modifiers = new DrawingModifiers(includeDebugData, paused);
+            var stageColor = modifiers.IsGamePaused ? Color.DarkSlateGray : Color.White;
 
             _spriteBatch.Begin(sortMode: SpriteSortMode.BackToFront);
-            _spriteBatch.Draw(textures.Stage, stageLocation.ToVector2(), null, Color.White, 0, default, 1f, SpriteEffects.None, LayerDepths.StageBackground);
+            _spriteBatch.Draw(textures.Stage, stageLocation.ToVector2(), null, stageColor, 0, default, 1f, SpriteEffects.None, LayerDepths.StageBackground);
 
             foreach (var @object in objects)
                 @object.Draw(gameTime, _spriteBatch, modifiers);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DlaGrzesia.Mechanics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace DlaGrzesia.Objects.UI

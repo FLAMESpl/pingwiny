@@ -14,7 +14,8 @@ namespace DlaGrzesia
             Events events,
             UpgradesCollection upgrades,
             MoneyDebugInput moneyDebugInput,
-            ParticleGenerator heartsGenerator)
+            ParticleGenerator heartsGenerator,
+            bool isGamePaused)
         {
             StageBounds = stageBounds;
             Input = input;
@@ -23,6 +24,7 @@ namespace DlaGrzesia
             Upgrades = upgrades;
             MoneyDebugInput = moneyDebugInput;
             HeartsGenerator = heartsGenerator;
+            IsGamePaused = isGamePaused;
         }
 
         public Rectangle StageBounds { get; }
@@ -32,6 +34,7 @@ namespace DlaGrzesia
         public UpgradesCollection Upgrades { get; }
         public MoneyDebugInput MoneyDebugInput { get; }
         public ParticleGenerator HeartsGenerator { get; }
+        public bool IsGamePaused { get; }
     }
 
     public class Events

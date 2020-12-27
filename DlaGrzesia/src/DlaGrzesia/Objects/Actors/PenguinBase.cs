@@ -44,7 +44,8 @@ namespace DlaGrzesia.Objects.Actors
 
         public void Draw(SpriteBatch batch, DrawingModifiers modifiers, int tilesetIndex)
         {
-            batch.Draw(tileset, Location, tilesetIndex, LayerDepths.Actors);
+            var color = modifiers.IsGamePaused ? Color.DarkSlateGray : Color.White;
+            batch.Draw(tileset, Location, tilesetIndex, LayerDepths.Actors, color);
             if (modifiers.IncludeDebugData)
             {
                 batch.DrawStringCoordinates(font, Location);
