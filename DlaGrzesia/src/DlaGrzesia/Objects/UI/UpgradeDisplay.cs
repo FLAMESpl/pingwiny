@@ -1,5 +1,6 @@
 ﻿using DlaGrzesia.Assets;
 using DlaGrzesia.Objects.Particles;
+using DlaGrzesia.Upgrades;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DlaGrzesia
+namespace DlaGrzesia.Upgrades
 {
     public struct Upgrade
     {
@@ -14,12 +14,12 @@ namespace DlaGrzesia
         }
     }
 
-    public class Upgrades
+    public class UpgradesCollection
     {
         private readonly IReadOnlyList<Upgrade> upgrades;
         private readonly List<int> boughtUpgrades = new List<int>();
 
-        public Upgrades(IReadOnlyList<Upgrade> upgrades)
+        public UpgradesCollection(IReadOnlyList<Upgrade> upgrades)
         {
             this.upgrades = upgrades;
         }

@@ -1,5 +1,6 @@
 ﻿using DlaGrzesia.Scoring;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DlaGrzesia
@@ -10,10 +11,16 @@ namespace DlaGrzesia
         public string CurrentMoneyString { get; private set; } = "";
         public Score NewScore { get; private set; }
 
+        private bool activationTick = false;
+
         public void Activate(Score current)
         {
-            Active = true;
-            CurrentMoneyString = current.Total.ToString();
+            if (!Active)
+            {
+                activationTick = true;
+                Active = true;
+                CurrentMoneyString = current.Total.ToString();
+            }
         }
 
         public void Update(InputInfo inputInfo)
@@ -36,6 +43,14 @@ namespace DlaGrzesia
                         CurrentMoneyString = CurrentMoneyString[0..^1];
                     else
                         CurrentMoneyString = "0";
+                }
+                else if (!activationTick && 
+                    inputInfo.Keyboard.IsKeyDown(Keys.LeftControl) &&
+                    inputInfo.IsKeyJustPressed(Keys.M))
+                {
+                    Active = false;
+                    CurrentMoneyString = "";
+                    NewScore = new Score(1_000_000_000);
                 }
                 else
                 {
@@ -66,6 +81,9 @@ namespace DlaGrzesia
             {
                 NewScore = null;
             }
+
+            if (activationTick)
+                activationTick = false;
         }
     }
 }

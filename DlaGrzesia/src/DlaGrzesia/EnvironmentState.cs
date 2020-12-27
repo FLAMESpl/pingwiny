@@ -1,5 +1,6 @@
 ﻿using DlaGrzesia.Objects.Particles;
 using DlaGrzesia.Scoring;
+using DlaGrzesia.Upgrades;
 using Microsoft.Xna.Framework;
 
 namespace DlaGrzesia
@@ -11,7 +12,7 @@ namespace DlaGrzesia
             InputInfo input, 
             Score score, 
             Events events,
-            Upgrades upgrades,
+            UpgradesCollection upgrades,
             MoneyDebugInput moneyDebugInput,
             ParticleGenerator heartsGenerator)
         {
@@ -28,7 +29,7 @@ namespace DlaGrzesia
         public InputInfo Input { get; }
         public Score Score { get; }
         public Events Events { get; }
-        public Upgrades Upgrades { get; }
+        public UpgradesCollection Upgrades { get; }
         public MoneyDebugInput MoneyDebugInput { get; }
         public ParticleGenerator HeartsGenerator { get; }
     }

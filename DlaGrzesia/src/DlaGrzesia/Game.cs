@@ -6,6 +6,7 @@ using DlaGrzesia.Objects.Particles;
 using DlaGrzesia.Objects.UI;
 using DlaGrzesia.Scoring;
 using DlaGrzesia.Serialization;
+using DlaGrzesia.Upgrades;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -33,6 +34,7 @@ namespace DlaGrzesia
         private readonly CyclicList<IEnumerable<Keys>> pressedKeys = new CyclicList<IEnumerable<Keys>>(12, Array.Empty<Keys>());
         private IReadOnlyList<UpgradeState> upgrades;
         private MoneyDebugInput moneyDebugInput = new MoneyDebugInput();
+        private Counter resetEnabled = Counter.NewElapsed(15);
 
         private Rectangle StageBounds => new Rectangle(stageLocation, stageSize);
 
@@ -46,18 +48,6 @@ namespace DlaGrzesia
         protected override void Initialize()
         {
             base.Initialize();
-
-            upgrades = new List<UpgradeState>
-            {
-                new UpgradeState(1),
-                new UpgradeState(10),
-                new UpgradeState(100),
-                new UpgradeState(500),
-                new UpgradeState(1000),
-                new UpgradeState(4000),
-                new UpgradeState(10000),
-                new UpgradeState(100000)
-            };
         }
 
         protected override void LoadContent()
@@ -73,9 +63,8 @@ namespace DlaGrzesia
             _graphics.ApplyChanges();
 
             heartsGenerator = new ParticleGenerator(textures.Heart);
-            objects.Add(heartsGenerator);
-            objects.Add(new PenguinGenerator(textures, fonts, heartsGenerator));
 
+            ResetGame();
             InitializeUI();
         }
 
@@ -103,7 +92,8 @@ namespace DlaGrzesia
                 else if (inputInfo.IsKeyJustPressed(Keys.S))
                 {
                     var repository = new GameStateRepository();
-                    var state = new GameState(objects.OfType<ISerializable>().ToList(), score.Total);
+                    var serializableObjects = objects.OfType<ISerializable>().Concat(upgrades).ToList();
+                    var state = new GameState(serializableObjects, score.Total);
                     repository.Save(state);
                     gameSaved = true;
                 }
@@ -119,8 +109,21 @@ namespace DlaGrzesia
                 else if (inputInfo.IsKeyJustPressed(Keys.M))
                 {
                     moneyDebugInput.Activate(score);
-                }    
+                }
+                else if (inputInfo.IsKeyJustPressed(Keys.R))
+                {
+                    if (resetEnabled.Elapsed)
+                    {
+                        resetEnabled = resetEnabled.Reset();
+                    }
+                    else
+                    {
+                        ResetGame();
+                    }
+                }
             }
+
+            resetEnabled = resetEnabled.Tick();
 
             var events = new Events(gameSaved);
             var upgradeStates = upgrades.Select(x => x.ToFrameState()).ToList();
@@ -130,7 +133,7 @@ namespace DlaGrzesia
                 inputInfo, 
                 score, 
                 events, 
-                new Upgrades(upgradeStates), 
+                new UpgradesCollection(upgradeStates), 
                 moneyDebugInput,
                 heartsGenerator);
 
@@ -227,6 +230,7 @@ namespace DlaGrzesia
                 var state = repository.Load(GetDeserializerFactories(heartsGenerator));
                 score = new Score(state.TotalScore);
                 objects = state.Objects.OfType<IObject>().ToList();
+                upgrades = state.Objects.OfType<UpgradeState>().ToList();
                 objects.Add(heartsGenerator);
                 return true;
             }
@@ -236,12 +240,36 @@ namespace DlaGrzesia
             }
         }
 
+        private void ResetGame()
+        {
+            score = new Score(0);
+
+            objects = new List<IObject>
+            {
+                heartsGenerator,
+                new PenguinGenerator(textures, fonts, heartsGenerator)
+            };
+
+            upgrades = new List<UpgradeState>
+            {
+                new UpgradeState(1, 0),
+                new UpgradeState(10, 0),
+                new UpgradeState(100, 0),
+                new UpgradeState(500, 0),
+                new UpgradeState(1000, 0),
+                new UpgradeState(4000, 0),
+                new UpgradeState(10000, 0),
+                new UpgradeState(100000, 0)
+            };
+        }
+
         private IEnumerable<IDeserializerFactory> GetDeserializerFactories(ParticleGenerator heartsGenerator)
         {
             yield return new PenguinGeneratorDeserializerFactory(textures, fonts, heartsGenerator);
             yield return new SlidingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
             yield return new SurfingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
             yield return new WalkingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
+            yield return new UpgradesDeserializationFactory();
         }
 
         private void InitializeUI()
@@ -257,6 +285,8 @@ namespace DlaGrzesia
             var upgradesGrid = new UpgradesGrid(new Point(1045, 150), new Point(270, 150), 2, new Point(30, 30));
             uiElements.Add(new UpgradeDisplay(textures.Alex, fonts.Font, upgradesGrid.GetIndexBounds(0), 0));
             uiElements.Add(new UpgradeDisplay(textures.Kamil, fonts.Font, upgradesGrid.GetIndexBounds(1), 1));
+            uiElements.Add(new UpgradeDisplay(textures.Marcin, fonts.Font, upgradesGrid.GetIndexBounds(2), 2));
+            uiElements.Add(new UpgradeDisplay(textures.Marek, fonts.Font, upgradesGrid.GetIndexBounds(3), 3));
         }
     }
 }
