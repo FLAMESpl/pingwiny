@@ -45,6 +45,9 @@ namespace DlaGrzesia
         [Tileset(150, 150)]
         public Tileset Marek { get; private set; }
 
+        [Tileset(150, 150)]
+        public Tileset Tymon { get; private set; }
+
         public void Dispose()
         {
             Heart?.Dispose();
@@ -60,6 +63,7 @@ namespace DlaGrzesia
             Kamil?.Dispose();
             Marcin?.Dispose();
             Marek?.Dispose();
+            Tymon?.Dispose();
         }
     }
 }

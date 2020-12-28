@@ -41,6 +41,7 @@
     <Content Include="..\..\assets\PenguinWalking.tga" Link="Content\PenguinWalking.tga" />
     <Content Include="..\..\assets\PenguinWithBoard.tga" Link="Content\PenguinWithBoard.tga" />
     <Content Include="..\..\assets\Stage.tga" Link="Content\Stage.tga" />
+    <Content Include="..\..\assets\Tymon.tga" Link="Content\Tymon.tga" />
     <Content Include="..\..\assets\UIBackground.tga" Link="Content\UIBackground.tga" />
   </ItemGroup>
   <ItemGroup>

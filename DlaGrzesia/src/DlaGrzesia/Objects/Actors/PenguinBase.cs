@@ -12,7 +12,6 @@ namespace DlaGrzesia.Objects.Actors
     {
         private readonly Tileset tileset;
         private readonly SpriteFont font;
-        private readonly ParticleGenerator generator;
         private int remainingDuration;
         private int scorePerClick;
         private int scorePerDestroy;
@@ -21,7 +20,6 @@ namespace DlaGrzesia.Objects.Actors
             Tileset tileset,
             SpriteFont font,
             ObjectOrientation orientation,
-            ParticleGenerator generator,
             Point location,
             int duration,
             int scorePerClick,
@@ -30,7 +28,6 @@ namespace DlaGrzesia.Objects.Actors
             this.tileset = tileset;
             this.font = font;
             Orientation = orientation;
-            this.generator = generator;
             Location = location;
             remainingDuration = duration;
             this.scorePerClick = scorePerClick;
@@ -72,12 +69,12 @@ namespace DlaGrzesia.Objects.Actors
                 {
                     Expired = true;
                     environmentState.Score.Increase(scorePerDestroy);
-                    generator.Spawn(new HeartsParticle(true, Location));
+                    environmentState.HeartsGenerator.Spawn(new HeartsParticle(true, Location));
                 }
                 else
                 {
                     environmentState.Score.Increase(scorePerClick);
-                    generator.Spawn(new HeartsParticle(false, Location));
+                    environmentState.HeartsGenerator.Spawn(new HeartsParticle(false, Location));
                 }
             }
             

@@ -83,7 +83,7 @@ namespace DlaGrzesia
 
             var gameSaved = false;
 
-            if (inputInfo.Keyboard.IsKeyDown(Keys.LeftControl))
+            if (inputInfo.Keyboard.IsKeyDown(Keys.LeftControl) || inputInfo.Keyboard.IsKeyDown(Keys.RightControl))
             {
                 if (inputInfo.IsKeyJustPressed(Keys.D))
                 {
@@ -229,7 +229,7 @@ namespace DlaGrzesia
             var repository = new GameStateRepository();
             if (repository.FileExists)
             {
-                var state = repository.Load(GetDeserializerFactories(heartsGenerator));
+                var state = repository.Load(GetDeserializerFactories());
                 score = new Score(state.TotalScore);
                 objects = state.Objects.OfType<IObject>().ToList();
                 upgrades = state.Objects.OfType<UpgradeState>().ToList();
@@ -249,7 +249,7 @@ namespace DlaGrzesia
             objects = new List<IObject>
             {
                 heartsGenerator,
-                new PenguinGenerator(textures, fonts, heartsGenerator)
+                new PenguinGenerator(textures, fonts)
             };
 
             upgrades = new List<UpgradeState>
@@ -265,12 +265,12 @@ namespace DlaGrzesia
             };
         }
 
-        private IEnumerable<IDeserializerFactory> GetDeserializerFactories(ParticleGenerator heartsGenerator)
+        private IEnumerable<IDeserializerFactory> GetDeserializerFactories()
         {
-            yield return new PenguinGeneratorDeserializerFactory(textures, fonts, heartsGenerator);
-            yield return new SlidingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
-            yield return new SurfingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
-            yield return new WalkingPenguinDeserializationFactory(textures, fonts, heartsGenerator);
+            yield return new PenguinGeneratorDeserializerFactory(textures, fonts);
+            yield return new SlidingPenguinDeserializationFactory(textures, fonts);
+            yield return new SurfingPenguinDeserializationFactory(textures, fonts);
+            yield return new WalkingPenguinDeserializationFactory(textures, fonts);
             yield return new UpgradesDeserializationFactory();
         }
 
@@ -289,6 +289,7 @@ namespace DlaGrzesia
             uiElements.Add(new UpgradeDisplay(textures.Kamil, fonts.Font, upgradesGrid.GetIndexBounds(1), 1));
             uiElements.Add(new UpgradeDisplay(textures.Marcin, fonts.Font, upgradesGrid.GetIndexBounds(2), 2));
             uiElements.Add(new UpgradeDisplay(textures.Marek, fonts.Font, upgradesGrid.GetIndexBounds(3), 3));
+            uiElements.Add(new UpgradeDisplay(textures.Tymon, fonts.Font, upgradesGrid.GetIndexBounds(4), 4));
         }
     }
 }

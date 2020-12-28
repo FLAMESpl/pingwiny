@@ -15,14 +15,12 @@ namespace DlaGrzesia.Objects.Actors
         private readonly Fonts fonts;
         private Counter spawnCooldown = Counter.NewStarted(30).ToCyclic();
         private readonly Random random = new Random();
-        private readonly ParticleGenerator heartsGenerator;
         private Counter surfingSpawnCooldown = Counter.NewStarted(1_000).ToCyclic();
 
-        public PenguinGenerator(Textures textures, Fonts fonts, ParticleGenerator heartsGenerator)
+        public PenguinGenerator(Textures textures, Fonts fonts)
         {
             this.textures = textures;
             this.fonts = fonts;
-            this.heartsGenerator = heartsGenerator;
         }
 
         public bool Expired => false;
@@ -61,7 +59,6 @@ namespace DlaGrzesia.Objects.Actors
                     textures.PenguinSliding, 
                     fonts.Font,
                     new ObjectOrientation(ObjectOrientationName.Down),
-                    heartsGenerator,
                     new Point(horizontalPosition, verticalPosition),
                     10,
                     2,
@@ -81,7 +78,6 @@ namespace DlaGrzesia.Objects.Actors
                     textures.PenguinWithBoard,
                     fonts.Font,
                     default,
-                    heartsGenerator,
                     new Point(horizontalPosition, verticalPosition),
                     int.MaxValue,
                     20,
@@ -101,7 +97,6 @@ namespace DlaGrzesia.Objects.Actors
                     textures.PenguinWalking, 
                     fonts.Font, 
                     ObjectOrientation.Random(random),
-                    heartsGenerator,
                     new Point(horizontalPosition, verticalPosition),
                     30,
                     1,

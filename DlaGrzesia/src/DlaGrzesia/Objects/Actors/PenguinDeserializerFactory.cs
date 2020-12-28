@@ -11,8 +11,7 @@ namespace DlaGrzesia.Objects.Actors
 
         public SlidingPenguinDeserializationFactory(
             Textures textures,
-            Fonts fonts,
-            ParticleGenerator heartsGenerator) : base(fonts, heartsGenerator)
+            Fonts fonts) : base(fonts)
         {
             this.textures = textures;
         }
@@ -33,8 +32,7 @@ namespace DlaGrzesia.Objects.Actors
 
         public SurfingPenguinDeserializationFactory(
             Textures textures,
-            Fonts fonts,
-            ParticleGenerator heartsGenerator) : base(fonts, heartsGenerator)
+            Fonts fonts) : base(fonts)
         {
             this.textures = textures;
         }
@@ -55,8 +53,7 @@ namespace DlaGrzesia.Objects.Actors
 
         public WalkingPenguinDeserializationFactory(
             Textures textures,
-            Fonts fonts,
-            ParticleGenerator heartsGenerator) : base(fonts, heartsGenerator)
+            Fonts fonts) : base(fonts)
         {
             this.textures = textures;
         }
@@ -73,14 +70,10 @@ namespace DlaGrzesia.Objects.Actors
     public abstract class PenguinDeserializerFactory
     {
         private readonly Fonts fonts;
-        private readonly ParticleGenerator heartsGenerator;
 
-        public PenguinDeserializerFactory(
-            Fonts fonts, 
-            ParticleGenerator heartsGenerator)
+        public PenguinDeserializerFactory(Fonts fonts)
         {
             this.fonts = fonts;
-            this.heartsGenerator = heartsGenerator;
         }
 
         protected PenguinBase DeserializeBase(Stream stream, Tileset tileset)
@@ -89,7 +82,6 @@ namespace DlaGrzesia.Objects.Actors
                 tileset,
                 fonts.Font,
                 default,
-                heartsGenerator,
                 default,
                 default,
                 default,
@@ -104,23 +96,20 @@ namespace DlaGrzesia.Objects.Actors
     {
         private readonly Textures textures;
         private readonly Fonts fonts;
-        private readonly ParticleGenerator heartsGenerator;
 
         public PenguinGeneratorDeserializerFactory(
             Textures textures, 
-            Fonts fonts,
-            ParticleGenerator heartsGenerator)
+            Fonts fonts)
         {
             this.textures = textures;
             this.fonts = fonts;
-            this.heartsGenerator = heartsGenerator;
         }
 
         public string Type { get; } = typeof(PenguinGenerator).FullName;
 
         public ISerializable CreateAndDeserialize(Stream stream)
         {
-            var generator = new PenguinGenerator(textures, fonts, heartsGenerator);
+            var generator = new PenguinGenerator(textures, fonts);
             generator.Deserialize(stream);
             return generator;
         }
