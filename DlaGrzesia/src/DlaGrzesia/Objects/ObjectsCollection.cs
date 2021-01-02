@@ -16,9 +16,14 @@ namespace DlaGrzesia.Objects
         public void Add(GameObject @object)
         {
             objects.Current.Add(@object);
-
             if (Initialized)
-                Initialize(Environment, GameState);
+                @object.Initialize(Environment, GameState);
+        }
+
+        public void Add(IEnumerable<GameObject> objects)
+        {
+            foreach (var @object in objects)
+                Add(@object);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch batch)

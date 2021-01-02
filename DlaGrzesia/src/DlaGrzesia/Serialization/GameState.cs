@@ -20,6 +20,12 @@ namespace DlaGrzesia.Serialization
             Upgrades = state.Upgrades;
         }
 
+        public void Initialize(GameEnvironment environment)
+        {
+            Stage.Initialize(environment, this);
+            Upgrades.Initialize(environment, this);
+        }
+
         public void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             Events = (Events)serializer.ReadNext(stream);

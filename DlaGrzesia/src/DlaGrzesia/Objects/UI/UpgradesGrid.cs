@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace DlaGrzesia.Objects.UI
 {
@@ -17,7 +18,15 @@ namespace DlaGrzesia.Objects.UI
             this.margin = margin;
         }
 
-        public Rectangle GetIndexBounds(int index)
+        public IEnumerable<UpgradeDisplay> CreateDisplays(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                yield return new UpgradeDisplay(GetIndexBounds(i), i);
+            }
+        }
+
+        private Rectangle GetIndexBounds(int index)
         {
             var positionInGrid = new Point(index % columns, index / columns);
             var position = location + positionInGrid * (size + margin);

@@ -7,7 +7,7 @@ namespace DlaGrzesia.Environment
         public void Execute(GameEnvironment environment, GameState gameState)
         {
             gameState.Load(new GameState());
-            gameState.Stage.Reset(environment, gameState);
+            gameState.Initialize(environment);
         }
     }
 }

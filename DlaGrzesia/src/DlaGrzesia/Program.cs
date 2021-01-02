@@ -10,6 +10,10 @@ namespace DlaGrzesia
         {
             using var game = new Game();
 
+#if DEBUG
+            game.Run();
+        }
+#else
             try
             {
                 game.Run();
@@ -30,5 +34,6 @@ namespace DlaGrzesia
             Directory.CreateDirectory(directoryPath);
             File.WriteAllText(filePath, exception.ToString());
         }
+#endif
     }
 }

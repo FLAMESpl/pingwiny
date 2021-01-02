@@ -1,18 +1,34 @@
-﻿using DlaGrzesia.Objects;
+﻿using DlaGrzesia.Assets;
+using DlaGrzesia.Mechanics;
+using DlaGrzesia.Objects;
 using DlaGrzesia.Serialization;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace DlaGrzesia.Upgrades
 {
     public class UpgradesCollection : GameObject, ISerializableGameState
     {
+        private const int UPGRADES_COUNT = 8;
+
+        private readonly List<int> tilesetIndices;
         private readonly List<Upgrade> upgrades;
+        private IReadOnlyList<Tileset> tilesets;
 
         public Upgrade this[int index] => upgrades[index];
 
         public UpgradesCollection()
         {
+            var random = new Random();
+
+            tilesetIndices = random.Shuffle(Enumerable.Range(0, 5));
+
+            tilesetIndices.Add(0);
+            tilesetIndices.Add(0);
+            tilesetIndices.Add(0);
+
             upgrades = new List<Upgrade>
             {
                 new Upgrade(1),
@@ -26,11 +42,13 @@ namespace DlaGrzesia.Upgrades
             };
         }
 
+        public Tileset GetTileset(int upgradeIndex) => tilesets[tilesetIndices[upgradeIndex]];
+
         public override void Deserialize(Stream stream, GameStateSerializer serializer)
         {
-            var count = stream.ReadInt();
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < UPGRADES_COUNT; i++)
             {
+                tilesetIndices[i] = stream.ReadInt();
                 upgrades[i] = (Upgrade)serializer.ReadNext(stream);
             }
             base.Deserialize(stream, serializer);
@@ -38,9 +56,25 @@ namespace DlaGrzesia.Upgrades
 
         public override void Serialize(Stream stream, GameStateSerializer serializer)
         {
-            stream.WriteInt(upgrades.Count);
-            upgrades.ForEach(u => serializer.WriteNext(stream, u));
+            for (int i = 0; i < UPGRADES_COUNT; i++)
+            {
+                stream.WriteInt(tilesetIndices[i]);
+                serializer.WriteNext(stream, upgrades[i]);
+            }
             base.Serialize(stream, serializer);
+        }
+
+        protected override void OnInitialized()
+        {
+            var textures = Environment.Resources.Textures;
+            tilesets = new[]
+            {
+                textures.Alex,
+                textures.Kamil,
+                textures.Marcin,
+                textures.Marek,
+                textures.Tymon
+            };
         }
     }
 }

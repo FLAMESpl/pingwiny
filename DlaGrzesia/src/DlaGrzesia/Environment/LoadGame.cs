@@ -11,6 +11,7 @@ namespace DlaGrzesia.Environment
             {
                 gameState.Load(repository.Load());
                 gameState.Stage.Objects.Initialize(environment, gameState);
+                gameState.Upgrades.Initialize(environment, gameState);
             }
         }
     }

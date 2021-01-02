@@ -14,7 +14,7 @@ namespace DlaGrzesia
         public Rectangle Bounds { get; } = new Rectangle(15, 15, 1000, 700);
         public ObjectsCollection Objects { get; private set; } = new ObjectsCollection();
 
-        public void Reset(GameEnvironment environment, GameState gameState)
+        public void Initialize(GameEnvironment environment, GameState gameState)
         {
             Objects = new ObjectsCollection();
             Objects.Initialize(environment, gameState);

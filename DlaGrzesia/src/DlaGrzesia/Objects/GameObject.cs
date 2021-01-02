@@ -17,10 +17,13 @@ namespace DlaGrzesia.Objects
 
         public void Initialize(GameEnvironment environment, GameState gameState)
         {
-            Environment = environment ?? throw new ArgumentNullException(nameof(environment));
-            GameState = gameState ?? throw new ArgumentNullException(nameof(gameState));
-            OnInitialized();
-            Initialized = true;
+            if (!Initialized)
+            {
+                Environment = environment ?? throw new ArgumentNullException(nameof(environment));
+                GameState = gameState ?? throw new ArgumentNullException(nameof(gameState));
+                OnInitialized();
+                Initialized = true;
+            }
         }
 
         public virtual void Draw(GameTime gameTime, SpriteBatch batch)

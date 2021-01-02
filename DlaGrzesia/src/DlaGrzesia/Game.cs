@@ -63,12 +63,16 @@ namespace DlaGrzesia
         protected override void Update(GameTime gameTime)
         {
             environment.Input.Update(Keyboard.GetState(), Mouse.GetState(Window));
+
             mechanicsElements.Update(gameTime);
             gameState.Stage.Objects.Update(gameTime);
+            gameState.Upgrades.Update(gameTime);
             uiElements.Update(gameTime);
             gameState.Score.Update();
+
             environment.ExecuteAllCommands(gameState);
             gameState.Events.Progress();
+
             base.Update(gameTime);
         }
 
@@ -116,17 +120,13 @@ namespace DlaGrzesia
 
             var upgradesGrid = new UpgradesGrid(new Point(1045, 150), new Point(270, 150), 2, new Point(30, 30));
 
-            uiElements.Add(new UpgradeDisplay(textures.Alex, upgradesGrid.GetIndexBounds(0), 0));
-            uiElements.Add(new UpgradeDisplay(textures.Kamil, upgradesGrid.GetIndexBounds(1), 1));
-            uiElements.Add(new UpgradeDisplay(textures.Marcin, upgradesGrid.GetIndexBounds(2), 2));
-            uiElements.Add(new UpgradeDisplay(textures.Marek, upgradesGrid.GetIndexBounds(3), 3));
-            uiElements.Add(new UpgradeDisplay(textures.Tymon, upgradesGrid.GetIndexBounds(4), 4));
+            uiElements.Add(upgradesGrid.CreateDisplays(5));
             uiElements.Add(new DebugOverlay());
         }
 
         private void InitializeStage()
         {
-            gameState.Stage.Reset(environment, gameState);
+            gameState.Initialize(environment);
         }
     }
 }
