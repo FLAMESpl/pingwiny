@@ -2,12 +2,13 @@
 using DlaGrzesia.Serialization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
 namespace DlaGrzesia.Objects
 {
-    public class ObjectsCollection : GameObject, ISerializable
+    public class ObjectsCollection : GameObject, IEnumerable<GameObject>, ISerializable
     {
         private readonly DoubleBuffered<List<GameObject>> objects = DoubleBuffered.Create<List<GameObject>>();
 
@@ -71,5 +72,8 @@ namespace DlaGrzesia.Objects
             foreach (var @object in objects.Current)
                 @object.Initialize(Environment, GameState);
         }
+
+        public IEnumerator<GameObject> GetEnumerator() => objects.Current.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

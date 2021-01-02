@@ -2,6 +2,7 @@
 using DlaGrzesia.Mechanics;
 using DlaGrzesia.Objects;
 using DlaGrzesia.Serialization;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,7 +32,7 @@ namespace DlaGrzesia.Upgrades
 
             upgrades = new List<Upgrade>
             {
-                new Upgrade(1),
+                new BasicClicker(),
                 new Upgrade(10),
                 new Upgrade(50),
                 new Upgrade(100),
@@ -43,6 +44,12 @@ namespace DlaGrzesia.Upgrades
         }
 
         public Tileset GetTileset(int upgradeIndex) => tilesets[tilesetIndices[upgradeIndex]];
+
+        public override void Update(GameTime gameTime)
+        {
+            foreach (var action in upgrades.Where(static u => u.Bought).Select(static u => u.GetAction()))
+                action.Execute(GameState);
+        }
 
         public override void Deserialize(Stream stream, GameStateSerializer serializer)
         {

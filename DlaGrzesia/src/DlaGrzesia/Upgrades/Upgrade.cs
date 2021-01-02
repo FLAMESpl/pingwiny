@@ -1,28 +1,31 @@
 ﻿using DlaGrzesia.Serialization;
+using DlaGrzesia.Upgrades.Actions;
 using System.IO;
 
 namespace DlaGrzesia.Upgrades
 {
-    public class Upgrade : ISerializableGameState
+    public class Upgrade : ISerializable
     {
         private Upgrade()
         {
         }
 
-        public Upgrade(int basePrice) : this(0, basePrice, basePrice)
+        public Upgrade(int basePrice)
         {
-        }
-
-        public Upgrade(int level, int basePrice, int currentPrice)
-        {
-            Level = level;
+            Level = 0;
             BasePrice = basePrice;
-            CurrentPrice = currentPrice;
+            CurrentPrice = basePrice;
         }
 
         public int Level { get; private set; }
         public int BasePrice { get; private set; }
         public int CurrentPrice { get; private set; }
+        public bool Bought => Level > 0;
+
+        public virtual IUpgradeAction GetAction()
+        {
+            return NoOperation.Instance;
+        }
 
         public void LevelUp()
         {
@@ -30,14 +33,14 @@ namespace DlaGrzesia.Upgrades
             CurrentPrice++;
         }
 
-        public void Deserialize(Stream stream, GameStateSerializer serializer)
+        public virtual void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             Level = stream.ReadInt();
             BasePrice = stream.ReadInt();
             CurrentPrice = stream.ReadInt();
         }
 
-        public void Serialize(Stream stream, GameStateSerializer serializer)
+        public virtual void Serialize(Stream stream, GameStateSerializer serializer)
         {
             stream.WriteInt(Level);
             stream.WriteInt(BasePrice);

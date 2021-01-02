@@ -13,6 +13,7 @@ namespace DlaGrzesia.Objects.Actors
         private int remainingDuration;
         private int scorePerClick;
         private int scorePerDestroy;
+        private bool spawnedParticleThisTick = false;
 
         protected PenguinBase() { }
 
@@ -56,27 +57,30 @@ namespace DlaGrzesia.Objects.Actors
             }
         }
 
-        public override void Update(GameTime gameTime)
+        public void Click()
         {
-            if (Environment.Input.TryConsumeLeftMouseButtonClick(Bounds))
-            {
-                remainingDuration--;
+            remainingDuration--;
 
-                if (remainingDuration == 0)
-                {
-                    Destroy();
-                    HandleClick(true, scorePerDestroy);
-                }
-                else
-                {
-                    HandleClick(false, scorePerClick);
-                }
-            }
-            
-            if (GameState.Stage.Bounds.Intersects(Bounds) == false)
+            if (remainingDuration == 0)
             {
                 Destroy();
+                HandleClick(true, scorePerDestroy);
             }
+            else
+            {
+                HandleClick(false, scorePerClick);
+            }
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            spawnedParticleThisTick = false;
+
+            if (Environment.Input.TryConsumeLeftMouseButtonClick(Bounds))
+                Click();
+            
+            if (GameState.Stage.Bounds.Intersects(Bounds) == false)
+                Destroy();
         }
 
         protected override void OnInitialized()
@@ -87,7 +91,11 @@ namespace DlaGrzesia.Objects.Actors
         private void HandleClick(bool yellowParticle, int score)
         {
             GameState.Score.Increase(score);
-            Schedule(new SpawnObject(new HeartParticle(yellowParticle, Location)));
+            if (!spawnedParticleThisTick)
+            {
+                spawnedParticleThisTick = true;
+                Schedule(new SpawnObject(new HeartParticle(yellowParticle, Location)));
+            }
         }
 
         public override void Serialize(Stream stream, GameStateSerializer serializer)

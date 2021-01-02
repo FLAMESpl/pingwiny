@@ -7,6 +7,7 @@ namespace DlaGrzesia.Environment
     {
         public Commands Commands { get; } = new Commands();
         public InputInfo Input { get; }
+        public Random Random { get; } = new Random();
         public GameResources Resources { get; }
         public bool IsPaused { get; private set; }
         public bool IsDebugDataOn { get; private set; }
