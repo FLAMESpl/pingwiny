@@ -1,40 +1,47 @@
-﻿using DlaGrzesia.Mechanics;
+﻿using DlaGrzesia.Assets;
+using DlaGrzesia.Mechanics;
 using DlaGrzesia.Serialization;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
 
 namespace DlaGrzesia.Objects.Actors
 {
-    public class WalkingPenguin : IObject, ISerializable
+    public class WalkingPenguin : PenguinBase
     {
         private readonly int speed = 2;
         private Counter animationCountdown = Counter.NewStarted(15).ToCyclic();
         private Counter animationIndex = Counter.NewStarted(3).ToCyclic();
         private readonly Random random = new Random();
         private Counter directionChangeCountdown = Counter.NewStarted(100);
+        private Tileset tileset;
 
         private Point SpeedVector => new Point(speed);
 
-        public WalkingPenguin(PenguinBase @base)
+        protected WalkingPenguin() { }
+
+        public WalkingPenguin(
+            ObjectOrientation orientation,
+            Point location,
+            int duration,
+            int scorePerClick,
+            int scorePerDestroy) : base(
+                orientation,
+                location,
+                duration,
+                scorePerClick,
+                scorePerDestroy)
         {
-            Base = @base;
         }
 
-        public bool Expired => Base.Expired;
-        private PenguinBase Base { get; }
+        protected override Tileset Tileset => tileset;
+        protected override int TilesetIndex => (int)Orientation.Name * 4 + animationIndex.CurrentValue;
 
-        public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
+        public override void Update(GameTime elapsed)
         {
-            Base.Draw(spriteBatch, modifiers, GetTileIndex());
-        }
+            base.Update(elapsed);
 
-        public void Update(GameTime elapsed, EnvironmentState environmentState)
-        {
-            Base.Update(environmentState);
-
-            if (!Expired)
+            if (IsAlive)
             {
                 if (directionChangeCountdown.Elapsed)
                     ChangeDirection();
@@ -45,35 +52,37 @@ namespace DlaGrzesia.Objects.Actors
                 if (animationCountdown.Elapsed)
                     animationIndex = animationIndex.Tick();
 
-                var movement = Base.Orientation.PointingDirection * SpeedVector;
-                Base.Location += movement;
+                var movement = Orientation.PointingDirection * SpeedVector;
+                Location += movement;
             }
         }
 
-        private int GetTileIndex()
+        public override void Serialize(Stream stream, GameStateSerializer serializer)
         {
-            return (int)Base.Orientation.Name * 4 + animationIndex.CurrentValue;
+            stream.WriteStruct(animationCountdown);
+            stream.WriteStruct(animationIndex);
+            stream.WriteStruct(directionChangeCountdown);
+            base.Serialize(stream, serializer);
         }
 
-        private void ChangeDirection()
-        {
-            Base.Orientation = ObjectOrientation.Random(random);
-            directionChangeCountdown = Counter.NewStarted(random.Next(50, 350));
-        }
-
-        public void Deserialize(Stream stream)
+        public override void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             animationCountdown = stream.ReadStruct<Counter>();
             animationIndex = stream.ReadStruct<Counter>();
             directionChangeCountdown = stream.ReadStruct<Counter>();
+            base.Deserialize(stream, serializer);
         }
 
-        public void Serialize(Stream stream)
+        protected override void OnInitialized()
         {
-            Base.Serialize(stream);
-            stream.WriteStruct(animationCountdown);
-            stream.WriteStruct(animationIndex);
-            stream.WriteStruct(directionChangeCountdown);
+            base.OnInitialized();
+            tileset = Environment.Resources.Textures.PenguinWalking;
+        }
+
+        private void ChangeDirection()
+        {
+            Orientation = ObjectOrientation.Random(random);
+            directionChangeCountdown = Counter.NewStarted(random.Next(50, 350));
         }
     }
 }

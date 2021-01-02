@@ -1,56 +1,68 @@
-﻿using DlaGrzesia.Mechanics;
+﻿using DlaGrzesia.Assets;
+using DlaGrzesia.Mechanics;
 using DlaGrzesia.Serialization;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 
 namespace DlaGrzesia.Objects.Actors
 {
-    public class SurfingPenguin : IObject, ISerializable
+    public class SurfingPenguin : PenguinBase
     {
         private Counter ascending = Counter.NewStarted(24);
         private readonly int horizontalSpeed = 4;
         private readonly int verticalSpeed = 3;
+        private Tileset tileset;
 
-        public SurfingPenguin(PenguinBase @base)
+        protected SurfingPenguin() { }
+
+        public SurfingPenguin(
+            Point location,
+            int duration,
+            int scorePerClick,
+            int scorePerDestroy) : base(
+                new ObjectOrientation(ObjectOrientationName.Down),
+                location,
+                duration,
+                scorePerClick,
+                scorePerDestroy)
         {
-            Base = @base;
         }
 
-        public bool Expired => Base.Expired;
-        private PenguinBase Base { get; }
+        protected override Tileset Tileset => tileset;
 
-        public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
+        public override void Update(GameTime elapsed)
         {
-            Base.Draw(spriteBatch, modifiers, 0);
-        }
+            base.Update(elapsed);
 
-        public void Deserialize(Stream stream)
-        {
-            ascending = stream.ReadStruct<Counter>();
-        }
-
-        public void Serialize(Stream stream)
-        {
-            Base.Serialize(stream);
-            stream.WriteStruct(ascending);
-        }
-
-        public void Update(GameTime elapsed, EnvironmentState environmentState)
-        {
-            Base.Update(environmentState);
-
-            if (!Expired)
+            if (IsAlive)
             {
-                Base.Location += GetMovement();
+                Location += GetMovement();
                 ascending = ascending.Tick();
             }
+        }
+
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+            tileset = Environment.Resources.Textures.PenguinWithBoard;
         }
 
         private Point GetMovement()
         {
             var direction = ascending.Elapsed ? 1 : -1;
             return new Point(-horizontalSpeed, verticalSpeed * direction);
+        }
+
+        public override void Serialize(Stream stream, GameStateSerializer serializer)
+        {
+            stream.WriteStruct(ascending);
+            base.Serialize(stream, serializer);
+        }
+
+        public override void Deserialize(Stream stream, GameStateSerializer serializer)
+        {
+            ascending = stream.ReadStruct<Counter>();
+            base.Deserialize(stream, serializer);
         }
     }
 }

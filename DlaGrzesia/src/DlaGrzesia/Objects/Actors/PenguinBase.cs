@@ -3,30 +3,26 @@ using DlaGrzesia.Objects.Particles;
 using DlaGrzesia.Serialization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.IO;
 
 namespace DlaGrzesia.Objects.Actors
 {
-    public class PenguinBase : ISerializable
+    public abstract class PenguinBase : GameObject, ISerializableGameState
     {
-        private readonly Tileset tileset;
-        private readonly SpriteFont font;
+        private SpriteFont font;
         private int remainingDuration;
         private int scorePerClick;
         private int scorePerDestroy;
 
+        protected PenguinBase() { }
+
         public PenguinBase(
-            Tileset tileset,
-            SpriteFont font,
             ObjectOrientation orientation,
             Point location,
             int duration,
             int scorePerClick,
             int scorePerDestroy)
         {
-            this.tileset = tileset;
-            this.font = font;
             Orientation = orientation;
             Location = location;
             remainingDuration = duration;
@@ -34,16 +30,17 @@ namespace DlaGrzesia.Objects.Actors
             this.scorePerDestroy = scorePerDestroy;
         }
 
-        public ObjectOrientation Orientation { get; set; }
-        public Point Location { get; set; }
-        public bool Expired { get; private set; }
-        public Rectangle Bounds => new Rectangle(Location, tileset.TileSize);
+        protected ObjectOrientation Orientation { get; set; }
+        protected Point Location { get; set; }
+        protected Rectangle Bounds => new Rectangle(Location, Tileset.TileSize);
+        protected abstract Tileset Tileset { get; }
+        protected virtual int TilesetIndex => 0;
 
-        public void Draw(SpriteBatch batch, DrawingModifiers modifiers, int tilesetIndex)
+        public override void Draw(GameTime gameTime, SpriteBatch batch)
         {
-            var color = modifiers.IsGamePaused ? Color.DarkSlateGray : Color.White;
-            batch.Draw(tileset, Location, tilesetIndex, LayerDepths.Actors, color);
-            if (modifiers.IncludeDebugData)
+            var color = Environment.IsPaused? Color.DarkSlateGray : Color.White;
+            batch.Draw(Tileset, Location, TilesetIndex, LayerDepths.Actors, color);
+            if (Environment.IsDebugDataOn)
             {
                 batch.DrawStringCoordinates(font, Location);
                 batch.DrawString(
@@ -59,49 +56,60 @@ namespace DlaGrzesia.Objects.Actors
             }
         }
 
-        public void Update(EnvironmentState environmentState)
+        public override void Update(GameTime gameTime)
         {
-            if (environmentState.Input.TryConsumeLeftMouseButtonClick(Bounds))
+            if (Environment.Input.TryConsumeLeftMouseButtonClick(Bounds))
             {
                 remainingDuration--;
 
                 if (remainingDuration == 0)
                 {
-                    Expired = true;
-                    environmentState.Score.Increase(scorePerDestroy);
-                    environmentState.HeartsGenerator.Spawn(new HeartsParticle(true, Location));
+                    Destroy();
+                    HandleClick(true, scorePerDestroy);
                 }
                 else
                 {
-                    environmentState.Score.Increase(scorePerClick);
-                    environmentState.HeartsGenerator.Spawn(new HeartsParticle(false, Location));
+                    HandleClick(false, scorePerClick);
                 }
             }
             
-            if (environmentState.StageBounds.Intersects(Bounds) == false)
+            if (GameState.Stage.Bounds.Intersects(Bounds) == false)
             {
-                Expired = true;
+                Destroy();
             }
         }
 
-        public void Serialize(Stream stream)
+        protected override void OnInitialized()
+        {
+            font = Environment.Resources.Fonts.Standard;
+        }
+
+        private void HandleClick(bool yellowParticle, int score)
+        {
+            GameState.Score.Increase(score);
+            Schedule(new SpawnObject(new HeartParticle(yellowParticle, Location)));
+        }
+
+        public override void Serialize(Stream stream, GameStateSerializer serializer)
         {
             stream.WriteInt(remainingDuration);
             stream.WriteInt(scorePerClick);
             stream.WriteInt(scorePerDestroy);
-            stream.WriteBool(Expired);
             stream.WriteStruct(Location);
             stream.WriteStruct(Orientation);
+
+            base.Serialize(stream, serializer);
         }
 
-        public void Deserialize(Stream stream)
+        public override void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             remainingDuration = stream.ReadInt();
             scorePerClick = stream.ReadInt();
             scorePerDestroy = stream.ReadInt();
-            Expired = stream.ReadBool();
             Location = stream.ReadStruct<Point>();
             Orientation = stream.ReadStruct<ObjectOrientation>();
+
+            base.Deserialize(stream, serializer);
         }
     }
 }

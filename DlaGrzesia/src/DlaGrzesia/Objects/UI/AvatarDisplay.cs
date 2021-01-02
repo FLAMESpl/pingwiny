@@ -1,4 +1,5 @@
 ﻿using DlaGrzesia.Assets;
+using DlaGrzesia.Environment;
 using DlaGrzesia.Mechanics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,28 +8,31 @@ using System.Linq;
 
 namespace DlaGrzesia.Objects.UI
 {
-    public class AvatarDisplay : IObject
+    public class AvatarDisplay : GameObject
     {
-        private readonly Tileset tileset;
-        private readonly Tileset dogTileset;
-        private readonly SpriteFont font;
+        private Tileset tileset;
+        private Tileset dogTileset;
+        private SpriteFont font;
         private readonly Point location;
         private readonly KonamiCodeSequence konamiCode = new KonamiCodeSequence();
         private Counter dogDuration = Counter.NewElapsed();
         private Counter dogFrameDuration = Counter.NewStarted(3).ToCyclic();
         private Counter safeShutdownDuration = Counter.NewElapsed(150);
 
-        public AvatarDisplay(Tileset tileset, Tileset dogTileset, SpriteFont font, Point location)
+        public AvatarDisplay(Point location)
         {
-            this.tileset = tileset;
-            this.dogTileset = dogTileset;
-            this.font = font;
             this.location = location;
         }
 
-        public bool Expired => false;
+        protected override void OnInitialized()
+        {
+            var textures = Environment.Resources.Textures;
+            tileset = textures.Grzesiek;
+            dogTileset = textures.DOG;
+            font = Environment.Resources.Fonts.Standard;
+        }
 
-        public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
+        public override void Draw(GameTime elapsed, SpriteBatch spriteBatch)
         {
             if (!safeShutdownDuration.Elapsed)
             {
@@ -43,7 +47,7 @@ namespace DlaGrzesia.Objects.UI
                 spriteBatch.Draw(tileset, location, 0, LayerDepths.UI);
             }
 
-            if (modifiers.IncludeDebugData)
+            if (Environment.IsDebugDataOn)
                 spriteBatch.DrawString(
                     font, 
                     konamiCode.CurrentKeyIndex.ToString(), 
@@ -51,7 +55,7 @@ namespace DlaGrzesia.Objects.UI
                     Color.OrangeRed);
         }
 
-        public void Update(GameTime elapsed, EnvironmentState environmentState)
+        public override void Update(GameTime elapsed)
         {
             if (!dogDuration.Elapsed)
             {
@@ -62,16 +66,18 @@ namespace DlaGrzesia.Objects.UI
 
             safeShutdownDuration = safeShutdownDuration.Tick();
 
-            if (environmentState.Input.JustPressedKeys.Count == 1)
+            if (Environment.Input.CanHandleKeyboardKeys)
             {
-                var pressedKey = environmentState.Input.JustPressedKeys.SingleOrDefault();
-                if (pressedKey != Keys.None && konamiCode.Update(pressedKey))
+                var pressedKey = Environment.Input.JustPressedKeys.FirstOrDefault();
+                if (pressedKey != Keys.None)
                 {
-                    dogDuration = Counter.NewStarted(dogTileset.TilesCount);
+                    Environment.Input.HandleKeyboardKeys();
+                    if (konamiCode.Update(pressedKey))
+                        dogDuration = Counter.NewStarted(dogTileset.TilesCount);
                 }
             }
 
-            if (environmentState.Events.GameSaved)
+            if (GameState.Events.TryGetFirst<GameSaved>(out _))
             {
                 safeShutdownDuration = safeShutdownDuration.Reset();
             }

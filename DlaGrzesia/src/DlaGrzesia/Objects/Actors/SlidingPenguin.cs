@@ -1,44 +1,45 @@
-﻿using DlaGrzesia.Serialization;
+﻿using DlaGrzesia.Assets;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 
 namespace DlaGrzesia.Objects.Actors
 {
-    public class SlidingPenguin : IObject, ISerializable
+    public class SlidingPenguin : PenguinBase
     {
         private readonly int speed = 5;
+        private Tileset tileset;
 
-        public SlidingPenguin(PenguinBase @base)
+        protected SlidingPenguin() { }
+
+        public SlidingPenguin(
+            Point location,
+            int duration,
+            int scorePerClick,
+            int scorePerDestroy) : base(
+                new ObjectOrientation(ObjectOrientationName.Down), 
+                location, 
+                duration,
+                scorePerClick,
+                scorePerDestroy)
         {
-            Base = @base;
         }
 
-        public bool Expired => Base.Expired;
-        private PenguinBase Base { get; }
+        protected override Tileset Tileset => tileset;
 
-        public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
+        public override void Update(GameTime elapsed)
         {
-            Base.Draw(spriteBatch, modifiers, (int)Base.Orientation.Name);
-        }
+            base.Update(elapsed);
 
-        public void Deserialize(Stream stream)
-        {
-        }
-
-        public void Serialize(Stream stream)
-        {
-            Base.Serialize(stream);
-        }
-
-        public void Update(GameTime elapsed, EnvironmentState environmentState)
-        {
-            Base.Update(environmentState);
-
-            if (!Expired)
+            if (IsAlive)
             {
-                Base.Location += new Point(0, speed);
+                Location += new Point(0, speed);
             }
+        }
+
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+            tileset = Environment.Resources.Textures.PenguinSliding;
         }
     }
 }

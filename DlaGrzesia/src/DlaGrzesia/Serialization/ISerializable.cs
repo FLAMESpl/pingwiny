@@ -4,7 +4,7 @@ namespace DlaGrzesia.Serialization
 {
     public interface ISerializable
     {
-        void Serialize(Stream stream);
-        void Deserialize(Stream stream);
+        void Serialize(Stream stream, GameStateSerializer serializer);
+        void Deserialize(Stream stream, GameStateSerializer serializer);
     }
 }

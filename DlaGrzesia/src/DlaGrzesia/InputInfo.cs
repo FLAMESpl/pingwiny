@@ -8,13 +8,16 @@ namespace DlaGrzesia
 {
     public class InputInfo
     {
-        private KeyboardState? previousKeyboard;
-        private MouseState? previousMouse;
+        private KeyboardState previousKeyboard = new KeyboardState();
+        private MouseState previousMouse = new MouseState();
 
-        public KeyboardState Keyboard { get; }
-        public MouseState Mouse { get; }
+        public KeyboardState Keyboard { get; private set; }
+        public MouseState Mouse { get; private set; }
+        public bool AreKeyboardKeysHandled { get; private set; }
         public bool IsMouseClickConsumed { get; private set; }
-        public IReadOnlyCollection<Keys> JustPressedKeys { get; private set; }
+        public IReadOnlyList<Keys> JustPressedKeys { get; private set; }
+
+        public bool CanHandleKeyboardKeys => !AreKeyboardKeysHandled && JustPressedKeys.Count > 0;
 
         public InputInfo(KeyboardState keyboard, MouseState mouse)
         {
@@ -23,25 +26,27 @@ namespace DlaGrzesia
             JustPressedKeys = Array.Empty<Keys>();
         }
 
-        public InputInfo GetNext(KeyboardState keyboard, MouseState mouse)
+        public void Update(KeyboardState keyboard, MouseState mouse)
         {
-            return new InputInfo(keyboard, mouse)
-            {
-                previousKeyboard = Keyboard,
-                previousMouse = Mouse,
-                JustPressedKeys = GetNextJustPressedKeys(keyboard)
-            };
+            previousKeyboard = Keyboard;
+            previousMouse = Mouse;
+            Keyboard = keyboard;
+            Mouse = mouse;
+            AreKeyboardKeysHandled = false;
+            IsMouseClickConsumed = false;
+            JustPressedKeys = GetNextJustPressedKeys();
         }
 
-        private IReadOnlyCollection<Keys> GetNextJustPressedKeys(KeyboardState nextKeyboard)
+        private IReadOnlyList<Keys> GetNextJustPressedKeys()
         {
-            var previouslyPressedKeys = Keyboard.GetPressedKeys();
-            return nextKeyboard.GetPressedKeys().Where(x => previouslyPressedKeys.Contains(x) == false).ToArray();
+            var previouslyPressedKeys = previousKeyboard.GetPressedKeys();
+            return Keyboard.GetPressedKeys().Where(x => previouslyPressedKeys.Contains(x) == false).ToArray();
         }
 
-        public bool IsKeyJustPressed(Keys key) => previousKeyboard?.IsKeyUp(key) == true && Keyboard.IsKeyDown(key);
-        public bool IsMouseLeftButtonJustPressed() => IsMouseButtonClicked(previousMouse?.LeftButton, Mouse.LeftButton);
-        public bool IsMouseRightButtonJustPressed() => IsMouseButtonClicked(previousMouse?.RightButton, Mouse.RightButton);
+        public bool IsControlKeyDown() => Keyboard.IsKeyDown(Keys.LeftControl) || Keyboard.IsKeyDown(Keys.RightControl);
+        public bool IsKeyJustPressed(Keys key) => previousKeyboard.IsKeyUp(key) && Keyboard.IsKeyDown(key);
+        public bool IsMouseLeftButtonJustPressed() => IsMouseButtonClicked(previousMouse.LeftButton, Mouse.LeftButton);
+        public bool IsMouseRightButtonJustPressed() => IsMouseButtonClicked(previousMouse.RightButton, Mouse.RightButton);
 
         public bool TryConsumeLeftMouseButtonClick(Rectangle bounds)
         {
@@ -57,8 +62,9 @@ namespace DlaGrzesia
         }
 
         public void ConsumeMouseClick() => IsMouseClickConsumed = true;
+        public void HandleKeyboardKeys() => AreKeyboardKeysHandled = true;
 
-        private static bool IsMouseButtonClicked(ButtonState? previous, ButtonState next) =>
+        private static bool IsMouseButtonClicked(ButtonState previous, ButtonState next) =>
             previous == ButtonState.Released && next == ButtonState.Pressed;
     }
 }

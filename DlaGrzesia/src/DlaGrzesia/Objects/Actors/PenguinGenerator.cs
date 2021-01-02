@@ -1,120 +1,99 @@
 ﻿using DlaGrzesia.Mechanics;
-using DlaGrzesia.Objects.Particles;
 using DlaGrzesia.Serialization;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace DlaGrzesia.Objects.Actors
 {
-    public class PenguinGenerator : IGenerator, IObject, ISerializable
+    public class PenguinGenerator : GameObject, ISerializableGameState
     {
-        private readonly Textures textures;
-        private readonly Fonts fonts;
         private Counter spawnCooldown = Counter.NewStarted(30).ToCyclic();
         private readonly Random random = new Random();
         private Counter surfingSpawnCooldown = Counter.NewStarted(1_000).ToCyclic();
+        private Textures textures;
 
-        public PenguinGenerator(Textures textures, Fonts fonts)
+        private Rectangle StageBounds => GameState.Stage.Bounds;
+
+        protected override void OnInitialized()
         {
-            this.textures = textures;
-            this.fonts = fonts;
+            textures = Environment.Resources.Textures;
         }
 
-        public bool Expired => false;
-
-        public Queue<IObject> SpawnedObjects { get; private set; } = new Queue<IObject>();
-
-        public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
-        {
-        }
-
-        public void Update(GameTime elapsed, EnvironmentState environmentState)
+        public override void Update(GameTime elapsed)
         {
             if (spawnCooldown.Elapsed)
             {
                 if (random.Next(0, 2) == 0)
-                    SpawnSliding(environmentState);
+                    SpawnSliding();
                 else
-                    SpawnWalking(environmentState);
+                    SpawnWalking();
             }
 
             if (surfingSpawnCooldown.Elapsed)
-                SpawnSurfing(environmentState);
+                SpawnSurfing();
 
             spawnCooldown = spawnCooldown.Tick();
             surfingSpawnCooldown = surfingSpawnCooldown.Tick();
         }
 
-        private void SpawnSliding(EnvironmentState environment)
+        private void SpawnSliding()
         {
             var size = textures.PenguinSliding.TileSize;
-            var horizontalPosition = random.Next(environment.StageBounds.Left, environment.StageBounds.Right - size.X + 1);
-            var verticalPosition = environment.StageBounds.Top - size.Y + 1;
+            var horizontalPosition = random.Next(StageBounds.Left, StageBounds.Right - size.X + 1);
+            var verticalPosition = StageBounds.Top - size.Y + 1;
 
-            var penguin = new SlidingPenguin(
-                new PenguinBase(
-                    textures.PenguinSliding, 
-                    fonts.Font,
-                    new ObjectOrientation(ObjectOrientationName.Down),
-                    new Point(horizontalPosition, verticalPosition),
-                    10,
-                    2,
-                    20));
-
-            SpawnedObjects.Enqueue(penguin);
+            Spawn(new SlidingPenguin(
+                new Point(horizontalPosition, verticalPosition),
+                10,
+                2,
+                20));
         }
 
-        private void SpawnSurfing(EnvironmentState environment)
+        private void SpawnSurfing()
         {
             var size = textures.PenguinWalking.TileSize;
-            var horizontalPosition = random.Next(environment.StageBounds.Left + 100, environment.StageBounds.Right - size.X + 100);
-            var verticalPosition = environment.StageBounds.Bottom - 100;
+            var horizontalPosition = random.Next(StageBounds.Left + 100, StageBounds.Right - size.X + 100);
+            var verticalPosition = StageBounds.Bottom - 100;
 
-            var penguin = new SurfingPenguin(
-                new PenguinBase(
-                    textures.PenguinWithBoard,
-                    fonts.Font,
-                    default,
-                    new Point(horizontalPosition, verticalPosition),
-                    int.MaxValue,
-                    20,
-                    0));
-
-            SpawnedObjects.Enqueue(penguin);
+            Spawn(new SurfingPenguin(
+                new Point(horizontalPosition, verticalPosition),
+                int.MaxValue,
+                20,
+                0));
         }
 
-        private void SpawnWalking(EnvironmentState environment)
+        private void SpawnWalking()
         {
             var size = textures.PenguinWalking.TileSize;
-            var horizontalPosition = random.Next(environment.StageBounds.Left, environment.StageBounds.Right - size.X);
-            var verticalPosition = random.Next(environment.StageBounds.Top, environment.StageBounds.Bottom - size.Y);
+            var horizontalPosition = random.Next(StageBounds.Left, StageBounds.Right - size.X);
+            var verticalPosition = random.Next(StageBounds.Top, StageBounds.Bottom - size.Y);
 
-            var penguin = new WalkingPenguin(
-                new PenguinBase(
-                    textures.PenguinWalking, 
-                    fonts.Font, 
-                    ObjectOrientation.Random(random),
-                    new Point(horizontalPosition, verticalPosition),
-                    30,
-                    1,
-                    5));
-
-            SpawnedObjects.Enqueue(penguin);
+            Spawn(new WalkingPenguin(
+                ObjectOrientation.Random(random),
+                new Point(horizontalPosition, verticalPosition),
+                30,
+                1,
+                5));
         }
 
-        public void Serialize(Stream stream)
+        private void Spawn(PenguinBase penguin)
+        {
+            Schedule(new SpawnObject(penguin));
+        }
+
+        public override void Serialize(Stream stream, GameStateSerializer serializer)
         {
             stream.WriteStruct(spawnCooldown);
             stream.WriteStruct(surfingSpawnCooldown);
+            base.Serialize(stream, serializer);
         }
 
-        public void Deserialize(Stream stream)
+        public override void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             spawnCooldown = stream.ReadStruct<Counter>();
             surfingSpawnCooldown = stream.ReadStruct<Counter>();
+            base.Deserialize(stream, serializer);
         }
     }
 }

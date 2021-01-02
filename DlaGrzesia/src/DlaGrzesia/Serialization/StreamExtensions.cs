@@ -47,6 +47,18 @@ namespace DlaGrzesia.Serialization
             return success;
         }
 
+        public static Type ReadType(this Stream stream)
+        {
+            var typeName = ReadVarchar(stream);
+            return Type.GetType(typeName);
+        }
+
+        public static string ReadVarchar(this Stream stream)
+        {
+            TryReadVarchar(stream, out var value);
+            return value;
+        }
+
         public static bool TryReadVarchar(this Stream stream, out string value)
         {
             if (TryReadInt(stream, out var length))
@@ -71,6 +83,11 @@ namespace DlaGrzesia.Serialization
         public static void WriteInt(this Stream stream, int value)
         {
             stream.Write(BitConverter.GetBytes(value));
+        }
+
+        public static void WriteType(this Stream stream, Type value)
+        {
+            WriteVarchar(stream, value.FullName);
         }
 
         public static void WriteVarchar(this Stream stream, string value)

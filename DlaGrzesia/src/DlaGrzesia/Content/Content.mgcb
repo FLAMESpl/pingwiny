@@ -361,10 +361,10 @@
 /processorParam:TextureFormat=Color
 /build:../../../assets/UIBackground.tga;UIBackground.tga
 
-#begin Font.spritefont
+#begin Standard.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Font.spritefont
+/build:Standard.spritefont
 

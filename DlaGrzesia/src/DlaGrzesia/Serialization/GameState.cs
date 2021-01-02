@@ -1,18 +1,39 @@
-﻿using System.Collections.Generic;
+﻿using DlaGrzesia.Environment;
+using DlaGrzesia.Scoring;
+using DlaGrzesia.Upgrades;
+using System.IO;
 
 namespace DlaGrzesia.Serialization
 {
-    public class GameState
+    public class GameState : ISerializableGameState
     {
-        public GameState(
-            IReadOnlyCollection<ISerializable> objects,
-            int totalScore)
+        public Events Events { get; private set; } = new Events();
+        public Score Score { get; private set; } = new Score();
+        public Stage Stage { get; private set; } = new Stage();
+        public UpgradesCollection Upgrades { get; private set; } = new UpgradesCollection();
+
+        public void Load(GameState state)
         {
-            Objects = objects;
-            TotalScore = totalScore;
+            Events = state.Events;
+            Score = state.Score;
+            Stage = state.Stage;
+            Upgrades = state.Upgrades;
         }
 
-        public IReadOnlyCollection<ISerializable> Objects { get; }
-        public int TotalScore { get; }
+        public void Deserialize(Stream stream, GameStateSerializer serializer)
+        {
+            Events = (Events)serializer.ReadNext(stream);
+            Score = (Score)serializer.ReadNext(stream);
+            Stage = (Stage)serializer.ReadNext(stream);
+            Upgrades = (UpgradesCollection)serializer.ReadNext(stream);
+        }
+
+        public void Serialize(Stream stream, GameStateSerializer serializer)
+        {
+            serializer.WriteNext(stream, Events);
+            serializer.WriteNext(stream, Score);
+            serializer.WriteNext(stream, Stage);
+            serializer.WriteNext(stream, Upgrades);
+        }
     }
 }

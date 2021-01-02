@@ -1,41 +1,54 @@
-﻿using DlaGrzesia.Mechanics;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace DlaGrzesia.Objects.UI
 {
-    public class ScoreDisplay : IObject
+    public class ScoreDisplay : GameObject
     {
-        private readonly Texture2D texture;
-        private readonly SpriteFont font;
+        private Texture2D texture;
+        private SpriteFont font;
         private readonly Point location;
         private readonly int distanceBetweenTextAndImage = 20;
-        private int points;
         private string debugPoints;
+        private bool showingDebugInput;
 
-        public ScoreDisplay(Texture2D texture, SpriteFont font, Point location)
+        public ScoreDisplay(Point location)
         {
-            this.texture = texture;
-            this.font = font;
             this.location = location;
         }
 
-        public bool Expired => false;
-
-        public void Draw(GameTime elapsed, SpriteBatch spriteBatch, DrawingModifiers modifiers)
+        public override void Draw(GameTime elapsed, SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, location.ToVector2(), null, Color.White, 0, default, 1f, SpriteEffects.None, LayerDepths.UI);
 
-            if (string.IsNullOrWhiteSpace(debugPoints))
-                spriteBatch.DrawString(font, points.ToString(), GetTextLocation(), Color.Black);
-            else
+            if (showingDebugInput)
                 spriteBatch.DrawString(font, debugPoints, GetTextLocation(), Color.DarkMagenta);
+            else
+                spriteBatch.DrawString(font, GameState.Score.Total.ToString(), GetTextLocation(), Color.Black);
         }
 
-        public void Update(GameTime elapsed, EnvironmentState environmentState)
+        public override void Update(GameTime elapsed)
         {
-            points = environmentState.Score.Total;
-            debugPoints = environmentState.MoneyDebugInput.CurrentMoneyString;
+            if (showingDebugInput)
+            {
+                if (GameState.Events.TryGetFirst<ScoreDebugInputDeactivated>(out _))
+                    showingDebugInput = false;
+                else if (GameState.Events.TryGetFirst<ScoreDebugInputAmountChanged>(out var @event))
+                    debugPoints = @event.Amount;
+
+            }
+            else if (GameState.Events.TryGetFirst<ScoreDebugInputActivated>(out var @event))
+            {
+                showingDebugInput = true;
+                debugPoints = @event.Amount;
+            }
+        }
+
+        protected override void OnInitialized()
+        {
+            var resources = Environment.Resources;
+            texture = resources.Textures.Hearts;
+            font = resources.Fonts.Standard;
         }
 
         private Vector2 GetTextLocation() => new Vector2(

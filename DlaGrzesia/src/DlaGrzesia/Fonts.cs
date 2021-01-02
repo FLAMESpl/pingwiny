@@ -6,6 +6,6 @@ namespace DlaGrzesia
     public class Fonts
     {
         [Resource]
-        public SpriteFont Font { get; private set; }
+        public SpriteFont Standard { get; private set; }
     }
 }
