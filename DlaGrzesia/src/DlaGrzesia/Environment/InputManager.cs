@@ -27,12 +27,16 @@ namespace DlaGrzesia.Environment
                 {
                     Keys.D => new ToggleDebugData(),
                     Keys.P => new TogglePause(),
-                    Keys.S => new SaveGame(),
                     Keys.L => new LoadGame(),
                     _ => default(ICommand)
                 };
 
-                if (pressedKey == Keys.R)
+                if (pressedKey == Keys.S)
+                {
+                    Environment.SaveGameAtTheEndOfCurrentFrame();
+                    input.HandleKeyboardKeys();
+                }
+                else if (pressedKey == Keys.R)
                 {
                     if (resetConfirmation.Elapsed)
                     {

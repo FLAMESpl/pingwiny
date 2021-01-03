@@ -14,7 +14,7 @@ namespace DlaGrzesia.Mechanics
         public int CurrentValue { get; private set; }
         public int CurrentValueReversed => StartValue - CurrentValue;
         public bool Cyclic { get; }
-        public int StartValue { get; }
+        public int StartValue { get; private set; }
 
         public bool Elapsed => CurrentValue == 0;
 
@@ -36,6 +36,12 @@ namespace DlaGrzesia.Mechanics
         public Counter Reset()
         {
             CurrentValue = StartValue;
+            return this;
+        }
+
+        public Counter StartFrom(int startValue)
+        {
+            StartValue = startValue;
             return this;
         }
 

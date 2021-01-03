@@ -33,8 +33,8 @@ namespace DlaGrzesia.Upgrades
             upgrades = new List<Upgrade>
             {
                 new BasicClicker(),
-                new Upgrade(10),
-                new Upgrade(50),
+                new SurfingClicker(),
+                new SurfingFrequencyUpgrade(),
                 new Upgrade(100),
                 new Upgrade(250),
                 new Upgrade(500),
@@ -47,8 +47,12 @@ namespace DlaGrzesia.Upgrades
 
         public override void Update(GameTime gameTime)
         {
-            foreach (var action in upgrades.Where(static u => u.Bought).Select(static u => u.GetAction()))
-                action.Execute(GameState);
+            if (!Environment.IsPaused)
+            {
+                var actions = upgrades.Where(static u => u.Bought).Select(static u => u.GetAction());
+                foreach (var action in actions)
+                    action.Execute(GameState);
+            }
         }
 
         public override void Deserialize(Stream stream, GameStateSerializer serializer)

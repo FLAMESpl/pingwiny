@@ -5,14 +5,23 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace DlaGrzesia.Objects
 {
     public class ObjectsCollection : GameObject, IEnumerable<GameObject>, ISerializable
     {
+        private bool processDuringPause = false;
         private readonly DoubleBuffered<List<GameObject>> objects = DoubleBuffered.Create<List<GameObject>>();
 
         public int Count => objects.Current.Count;
+
+        private ObjectsCollection() { }
+
+        public ObjectsCollection(bool processDuringPause)
+        {
+            this.processDuringPause = processDuringPause;
+        }
 
         public void Add(GameObject @object)
         {
@@ -35,7 +44,7 @@ namespace DlaGrzesia.Objects
 
         public override void Update(GameTime gameTime)
         {
-            if (Environment?.IsPaused == false)
+            if (processDuringPause || Environment?.IsPaused == false)
             {
                 foreach (var @object in objects.Current)
                 {
@@ -51,6 +60,7 @@ namespace DlaGrzesia.Objects
 
         public override void Deserialize(Stream stream, GameStateSerializer serializer)
         {
+            processDuringPause = stream.ReadBool();
             var count = stream.ReadInt();
             for (int i = 0; i < count; i++)
                 Add((GameObject)serializer.ReadNext(stream));
@@ -60,8 +70,10 @@ namespace DlaGrzesia.Objects
 
         public override void Serialize(Stream stream, GameStateSerializer serializer)
         {
-            stream.WriteInt(Count);
-            foreach (var @object in objects.Current)
+            var serializableItems = objects.Current.OfType<ISerializableGameState>().ToList();
+            stream.WriteBool(processDuringPause);
+            stream.WriteInt(serializableItems.Count);
+            foreach (var @object in serializableItems)
                 serializer.WriteNext(stream, @object);
 
             base.Serialize(stream, serializer);

@@ -12,11 +12,11 @@ namespace DlaGrzesia
         public Stage() { }
 
         public Rectangle Bounds { get; } = new Rectangle(15, 15, 1000, 700);
-        public ObjectsCollection Objects { get; private set; } = new ObjectsCollection();
+        public ObjectsCollection Objects { get; private set; } = new ObjectsCollection(false);
 
         public void Initialize(GameEnvironment environment, GameState gameState)
         {
-            Objects = new ObjectsCollection();
+            Objects = new ObjectsCollection(false);
             Objects.Initialize(environment, gameState);
             Objects.Add(new PenguinGenerator());
         }

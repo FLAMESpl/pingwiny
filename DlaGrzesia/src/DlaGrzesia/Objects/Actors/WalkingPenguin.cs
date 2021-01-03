@@ -15,6 +15,8 @@ namespace DlaGrzesia.Objects.Actors
         private readonly Random random = new Random();
         private Counter directionChangeCountdown = Counter.NewStarted(100);
         private Tileset tileset;
+        private ObjectOrientation currentOrientation;
+        private ObjectOrientation headingOrientation;
 
         private Point SpeedVector => new Point(speed);
 
@@ -26,16 +28,17 @@ namespace DlaGrzesia.Objects.Actors
             int duration,
             int scorePerClick,
             int scorePerDestroy) : base(
-                orientation,
                 location,
                 duration,
                 scorePerClick,
                 scorePerDestroy)
         {
+            currentOrientation = orientation;
+            headingOrientation = orientation;
         }
 
         protected override Tileset Tileset => tileset;
-        protected override int TilesetIndex => (int)Orientation.Name * 4 + animationIndex.CurrentValue;
+        protected override int TilesetIndex => (int)currentOrientation.Name * 4 + animationIndex.CurrentValue;
 
         public override void Update(GameTime elapsed)
         {
@@ -52,7 +55,7 @@ namespace DlaGrzesia.Objects.Actors
                 if (animationCountdown.Elapsed)
                     animationIndex = animationIndex.Tick();
 
-                var movement = Orientation.PointingDirection * SpeedVector;
+                var movement = currentOrientation.PointingDirection * SpeedVector;
                 Location += movement;
             }
         }
@@ -62,6 +65,8 @@ namespace DlaGrzesia.Objects.Actors
             stream.WriteStruct(animationCountdown);
             stream.WriteStruct(animationIndex);
             stream.WriteStruct(directionChangeCountdown);
+            stream.WriteStruct(currentOrientation);
+            stream.WriteStruct(headingOrientation);
             base.Serialize(stream, serializer);
         }
 
@@ -70,6 +75,8 @@ namespace DlaGrzesia.Objects.Actors
             animationCountdown = stream.ReadStruct<Counter>();
             animationIndex = stream.ReadStruct<Counter>();
             directionChangeCountdown = stream.ReadStruct<Counter>();
+            currentOrientation = stream.ReadStruct<ObjectOrientation>();
+            headingOrientation = stream.ReadStruct<ObjectOrientation>();
             base.Deserialize(stream, serializer);
         }
 
@@ -81,8 +88,10 @@ namespace DlaGrzesia.Objects.Actors
 
         private void ChangeDirection()
         {
-            Orientation = ObjectOrientation.Random(random);
             directionChangeCountdown = Counter.NewStarted(random.Next(50, 350));
+            currentOrientation = ObjectOrientation.RandomInDirectionOfOrNeutral(
+                random, 
+                headingOrientation.HorizontalVector);
         }
     }
 }

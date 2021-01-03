@@ -27,24 +27,27 @@ namespace DlaGrzesia.Upgrades
             return NoOperation.Instance;
         }
 
-        public void LevelUp()
+        public void LevelUp(int amount)
         {
-            Level++;
+            Level += amount;
             CurrentPrice++;
+            OnLeveledUp();
         }
 
         public virtual void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             Level = stream.ReadInt();
-            BasePrice = stream.ReadInt();
             CurrentPrice = stream.ReadInt();
         }
 
         public virtual void Serialize(Stream stream, GameStateSerializer serializer)
         {
             stream.WriteInt(Level);
-            stream.WriteInt(BasePrice);
             stream.WriteInt(CurrentPrice);
+        }
+
+        protected virtual void OnLeveledUp()
+        {
         }
     }
 }

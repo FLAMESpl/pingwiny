@@ -9,6 +9,7 @@ namespace DlaGrzesia.Objects.UI
 {
     public class UpgradeDisplay : GameObject
     {
+        private const int CTRL_LEVELS_COUNT = 10;
         private SpriteFont font;
         private readonly Rectangle bounds;
         private readonly int index;
@@ -55,7 +56,7 @@ namespace DlaGrzesia.Objects.UI
                 {
                     if (GameState.Score.TrySpend(Upgrade.CurrentPrice))
                     {
-                        Upgrade.LevelUp();
+                        Upgrade.LevelUp(Environment.Input.IsControlKeyDown() ? CTRL_LEVELS_COUNT : 1);
                         Schedule(new SpawnObject(new HeartParticle(false, Environment.Input.Mouse.Position)));
                     }
 

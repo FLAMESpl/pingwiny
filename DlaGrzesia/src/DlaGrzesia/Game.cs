@@ -15,8 +15,8 @@ namespace DlaGrzesia
         private SpriteBatch _spriteBatch;
         private GameEnvironment environment;
         private GameState gameState;
-        private readonly ObjectsCollection mechanicsElements = new ObjectsCollection();
-        private readonly ObjectsCollection uiElements = new ObjectsCollection();
+        private readonly ObjectsCollection mechanicsElements = new ObjectsCollection(true);
+        private readonly ObjectsCollection uiElements = new ObjectsCollection(true);
 
         public Game()
         {
@@ -71,6 +71,7 @@ namespace DlaGrzesia
             gameState.Score.Update();
 
             environment.ExecuteAllCommands(gameState);
+            environment.SaveGameIfRequested(gameState);
             gameState.Events.Progress();
 
             base.Update(gameTime);

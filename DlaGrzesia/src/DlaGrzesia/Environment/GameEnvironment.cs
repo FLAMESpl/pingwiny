@@ -12,6 +12,8 @@ namespace DlaGrzesia.Environment
         public bool IsPaused { get; private set; }
         public bool IsDebugDataOn { get; private set; }
 
+        private bool saveGameAtTheEndOfCurrentFrame = false;
+
         public GameEnvironment(
             InputInfo input,
             GameResources resources,
@@ -25,7 +27,19 @@ namespace DlaGrzesia.Environment
         }
 
         public void ExecuteAllCommands(GameState state) => Commands.ExecuteAll(this, state);
+        public void SaveGameAtTheEndOfCurrentFrame() => saveGameAtTheEndOfCurrentFrame = true;
         public void SwitchDebugData() => IsDebugDataOn = !IsDebugDataOn;
         public void SwitchPause() => IsPaused = !IsPaused;
+
+        public void SaveGameIfRequested(GameState gameState)
+        {
+            if (saveGameAtTheEndOfCurrentFrame)
+            {
+                saveGameAtTheEndOfCurrentFrame = false;
+                var repository = new GameStateRepository();
+                repository.Save(gameState);
+                gameState.Events.Add(new GameSaved());
+            }
+        }
     }
 }

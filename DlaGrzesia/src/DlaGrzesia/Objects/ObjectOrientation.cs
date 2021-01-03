@@ -12,9 +12,25 @@ namespace DlaGrzesia.Objects
             Name = name;
         }
 
+        public ObjectOrientation(ObjectHorizontalVector horizontal, ObjectVerticalVector vertical)
+        {
+            Name = (horizontal, vertical) switch
+            {
+                (ObjectHorizontalVector.Left, ObjectVerticalVector.Down) => ObjectOrientationName.DownLeft,
+                (ObjectHorizontalVector.Left, ObjectVerticalVector.Neutral) => ObjectOrientationName.Left,
+                (ObjectHorizontalVector.Left, ObjectVerticalVector.Up) => ObjectOrientationName.UpLeft,
+                (ObjectHorizontalVector.Neutral, ObjectVerticalVector.Down) => ObjectOrientationName.Down,
+                (ObjectHorizontalVector.Neutral, ObjectVerticalVector.Up) => ObjectOrientationName.Up,
+                (ObjectHorizontalVector.Right, ObjectVerticalVector.Down) => ObjectOrientationName.DownRight,
+                (ObjectHorizontalVector.Right, ObjectVerticalVector.Neutral) => ObjectOrientationName.Right,
+                (ObjectHorizontalVector.Right, ObjectVerticalVector.Up) => ObjectOrientationName.UpRight,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
         public Point PointingDirection => new Point((int)HorizontalVector, (int)VerticalVector);
 
-        private ObjectVerticalVector VerticalVector => Name switch
+        public ObjectVerticalVector VerticalVector => Name switch
         {
             ObjectOrientationName.Down or
             ObjectOrientationName.DownRight or
@@ -27,7 +43,7 @@ namespace DlaGrzesia.Objects
             _ => ObjectVerticalVector.Neutral
         };
 
-        private ObjectHorizontalVector HorizontalVector => Name switch
+        public ObjectHorizontalVector HorizontalVector => Name switch
         {
             ObjectOrientationName.Right or
             ObjectOrientationName.DownRight or
@@ -44,6 +60,18 @@ namespace DlaGrzesia.Objects
         {
             var orientation = random.Next(0, 7);
             return new ObjectOrientation((ObjectOrientationName)orientation);
+        }
+
+        public static ObjectOrientation RandomInDirectionOfOrNeutral(Random random, ObjectHorizontalVector vector)
+        {
+            var verticalVector = (ObjectVerticalVector)random.Next(-1, 2);
+            var horizontalVector = verticalVector == ObjectVerticalVector.Neutral
+                ? vector
+                : random.Next(0, 2) == 0
+                    ? vector
+                    : ObjectHorizontalVector.Neutral;
+
+            return new ObjectOrientation(horizontalVector, verticalVector);
         }
     }
 

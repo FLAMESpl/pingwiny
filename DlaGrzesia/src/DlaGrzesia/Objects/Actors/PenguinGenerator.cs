@@ -10,6 +10,7 @@ namespace DlaGrzesia.Objects.Actors
     {
         private Counter spawnCooldown = Counter.NewStarted(30).ToCyclic();
         private readonly Random random = new Random();
+        private float surfingSpawnCooldownNonRounded = 1_000;
         private Counter surfingSpawnCooldown = Counter.NewStarted(1_000).ToCyclic();
         private Textures textures;
 
@@ -35,6 +36,25 @@ namespace DlaGrzesia.Objects.Actors
 
             spawnCooldown = spawnCooldown.Tick();
             surfingSpawnCooldown = surfingSpawnCooldown.Tick();
+        }
+
+        public void DecreaseSurfingCooldown(float rate)
+        {
+            var newStartCandidate = surfingSpawnCooldownNonRounded * (1 - rate);
+            var newStartRounded = (int)Math.Round(newStartCandidate);
+            int newStart;
+
+            if (newStartRounded > 1)
+            {
+                surfingSpawnCooldownNonRounded = newStartCandidate;
+                newStart = newStartRounded;
+            }
+            else
+            {
+                surfingSpawnCooldownNonRounded = newStart = 1;
+            }
+
+            surfingSpawnCooldown.StartFrom(newStart);
         }
 
         private void SpawnSliding()
@@ -65,12 +85,19 @@ namespace DlaGrzesia.Objects.Actors
 
         private void SpawnWalking()
         {
+            var orientation = random.Next(0, 2) == 0
+                ? new ObjectOrientation(ObjectOrientationName.Left)
+                : new ObjectOrientation(ObjectOrientationName.Right);
+
             var size = textures.PenguinWalking.TileSize;
-            var horizontalPosition = random.Next(StageBounds.Left, StageBounds.Right - size.X);
+            var horizontalPosition = orientation.Name == ObjectOrientationName.Left
+                ? StageBounds.Right - 1
+                : StageBounds.Left + 1 - size.X;
+
             var verticalPosition = random.Next(StageBounds.Top, StageBounds.Bottom - size.Y);
 
             Spawn(new WalkingPenguin(
-                ObjectOrientation.Random(random),
+                orientation,
                 new Point(horizontalPosition, verticalPosition),
                 30,
                 1,

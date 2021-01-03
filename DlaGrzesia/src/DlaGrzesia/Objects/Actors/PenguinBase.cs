@@ -18,20 +18,17 @@ namespace DlaGrzesia.Objects.Actors
         protected PenguinBase() { }
 
         public PenguinBase(
-            ObjectOrientation orientation,
             Point location,
             int duration,
             int scorePerClick,
             int scorePerDestroy)
         {
-            Orientation = orientation;
             Location = location;
             remainingDuration = duration;
             this.scorePerClick = scorePerClick;
             this.scorePerDestroy = scorePerDestroy;
         }
 
-        protected ObjectOrientation Orientation { get; set; }
         protected Point Location { get; set; }
         protected Rectangle Bounds => new Rectangle(Location, Tileset.TileSize);
         protected abstract Tileset Tileset { get; }
@@ -104,7 +101,6 @@ namespace DlaGrzesia.Objects.Actors
             stream.WriteInt(scorePerClick);
             stream.WriteInt(scorePerDestroy);
             stream.WriteStruct(Location);
-            stream.WriteStruct(Orientation);
 
             base.Serialize(stream, serializer);
         }
@@ -115,7 +111,6 @@ namespace DlaGrzesia.Objects.Actors
             scorePerClick = stream.ReadInt();
             scorePerDestroy = stream.ReadInt();
             Location = stream.ReadStruct<Point>();
-            Orientation = stream.ReadStruct<ObjectOrientation>();
 
             base.Deserialize(stream, serializer);
         }

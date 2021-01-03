@@ -16,7 +16,6 @@ namespace DlaGrzesia.Objects.Actors
             int duration,
             int scorePerClick,
             int scorePerDestroy) : base(
-                new ObjectOrientation(ObjectOrientationName.Down), 
                 location, 
                 duration,
                 scorePerClick,

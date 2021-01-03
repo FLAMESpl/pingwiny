@@ -6,13 +6,13 @@ using System.IO;
 
 namespace DlaGrzesia.Upgrades
 {
-    public class BasicClicker : Upgrade
+    public class SurfingClicker : Upgrade
     {
-        private const int BASE_COOLDOWN = 100;
-        private const float COOLDOWN_REDUCTION_RATE = 0.05f;
-        private Counter activationCooldown = Counter.NewStarted(BASE_COOLDOWN).ToCyclic();
+        private const int BASE_COOLDOWN = 50;
+        private const float COOLDOWN_REDUCTION_RATE = 0.1f;
+        private Counter activationCooldown = Counter.NewStarted(100).ToCyclic();
 
-        public BasicClicker() : base(1)
+        public SurfingClicker() : base(10)
         {
         }
 
@@ -20,7 +20,7 @@ namespace DlaGrzesia.Upgrades
         {
             activationCooldown.Tick();
             return activationCooldown.Elapsed
-                ? ClickRandomNonSurfingPenguin.Instance
+                ? ClickSurfingPenguin.Instance
                 : NoOperation.Instance;
         }
 

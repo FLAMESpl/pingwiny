@@ -6,6 +6,10 @@ namespace DlaGrzesia.Upgrades.Actions
 {
     public class ClickRandomNonSurfingPenguin : IUpgradeAction
     {
+        public static readonly ClickRandomNonSurfingPenguin Instance = new ClickRandomNonSurfingPenguin();
+
+        private ClickRandomNonSurfingPenguin() { }
+
         public void Execute(GameState gameState)
         {
             var penguin = (PenguinBase)gameState.Stage.Objects.FirstOrDefault(static obj =>
