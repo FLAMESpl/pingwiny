@@ -35,7 +35,7 @@ namespace DlaGrzesia.Upgrades
                 new BasicClicker(),
                 new SurfingClicker(),
                 new SurfingFrequencyUpgrade(),
-                new Upgrade(100),
+                new PenguinDurationUpgrade(),
                 new Upgrade(250),
                 new Upgrade(500),
                 new Upgrade(1000),

@@ -11,7 +11,10 @@ namespace DlaGrzesia.Objects.Actors
         private Counter spawnCooldown = Counter.NewStarted(30).ToCyclic();
         private readonly Random random = new Random();
         private float surfingSpawnCooldownNonRounded = 1_000;
+        private float penguinDurationBonus = 0;
+        private float penguinDestroyBonus = 0;
         private Counter surfingSpawnCooldown = Counter.NewStarted(1_000).ToCyclic();
+
         private Textures textures;
 
         private Rectangle StageBounds => GameState.Stage.Bounds;
@@ -57,6 +60,16 @@ namespace DlaGrzesia.Objects.Actors
             surfingSpawnCooldown.StartFrom(newStart);
         }
 
+        public void IncreasePenguinsDuration(float bonus)
+        {
+            penguinDurationBonus += bonus;
+        }
+
+        public void IncreasePenguinsDestroyBonus(float bonus)
+        {
+            penguinDestroyBonus += bonus;
+        }
+
         private void SpawnSliding()
         {
             var size = textures.PenguinSliding.TileSize;
@@ -65,9 +78,9 @@ namespace DlaGrzesia.Objects.Actors
 
             Spawn(new SlidingPenguin(
                 new Point(horizontalPosition, verticalPosition),
-                10,
+                CalculateDuration(10),
                 2,
-                20));
+                CalculateDestroyPoints(20)));
         }
 
         private void SpawnSurfing()
@@ -99,9 +112,9 @@ namespace DlaGrzesia.Objects.Actors
             Spawn(new WalkingPenguin(
                 orientation,
                 new Point(horizontalPosition, verticalPosition),
-                30,
+                CalculateDuration(30),
                 1,
-                5));
+                CalculateDestroyPoints(5)));
         }
 
         private void Spawn(PenguinBase penguin)
@@ -109,10 +122,17 @@ namespace DlaGrzesia.Objects.Actors
             Schedule(new SpawnObject(penguin));
         }
 
+        private int CalculateDuration(int @base) => CalculateWithBonus(@base, penguinDurationBonus);
+        private int CalculateDestroyPoints(int @base) => CalculateWithBonus(@base, penguinDestroyBonus);
+        private static int CalculateWithBonus(int @base, float bonus) => (int)Math.Round((bonus + 1) * @base);
+
         public override void Serialize(Stream stream, GameStateSerializer serializer)
         {
             stream.WriteStruct(spawnCooldown);
             stream.WriteStruct(surfingSpawnCooldown);
+            stream.WriteFloat(surfingSpawnCooldownNonRounded);
+            stream.WriteFloat(penguinDurationBonus);
+            stream.WriteFloat(penguinDestroyBonus);
             base.Serialize(stream, serializer);
         }
 
@@ -120,6 +140,9 @@ namespace DlaGrzesia.Objects.Actors
         {
             spawnCooldown = stream.ReadStruct<Counter>();
             surfingSpawnCooldown = stream.ReadStruct<Counter>();
+            surfingSpawnCooldownNonRounded = stream.ReadFloat();
+            penguinDurationBonus = stream.ReadFloat();
+            penguinDestroyBonus = stream.ReadFloat();
             base.Deserialize(stream, serializer);
         }
     }

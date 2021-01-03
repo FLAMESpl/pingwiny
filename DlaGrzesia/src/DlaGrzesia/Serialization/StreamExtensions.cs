@@ -33,6 +33,13 @@ namespace DlaGrzesia.Serialization
             }
         }
 
+        public static float ReadFloat(this Stream stream)
+        {
+            Span<byte> buffer = stackalloc byte[sizeof(float)];
+            stream.Read(buffer);
+            return BitConverter.ToSingle(buffer);
+        }
+
         public static int ReadInt(this Stream stream)
         {
             TryReadInt(stream, out var value);
@@ -41,7 +48,7 @@ namespace DlaGrzesia.Serialization
 
         public static bool TryReadInt(this Stream stream, out int value)
         {
-            Span<byte> buffer = stackalloc byte[4];
+            Span<byte> buffer = stackalloc byte[sizeof(int)];
             var success = stream.Read(buffer) == 4;
             value = success ? BitConverter.ToInt32(buffer) : default;
             return success;
@@ -78,6 +85,11 @@ namespace DlaGrzesia.Serialization
         public static void WriteBool(this Stream stream, bool value)
         {
             stream.WriteByte(value ? 1 : 0);
+        }
+
+        public static void WriteFloat(this Stream stream, float value)
+        {
+            stream.Write(BitConverter.GetBytes(value));
         }
 
         public static void WriteInt(this Stream stream, int value)
