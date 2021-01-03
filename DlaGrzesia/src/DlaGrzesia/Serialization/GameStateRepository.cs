@@ -13,7 +13,7 @@ namespace DlaGrzesia.Serialization
 
         public GameState Load()
         {
-            using var stream = new FileStream(FilePath, FileMode.Open);
+            using var stream = new FileStream(FilePath, FileMode.Open, FileAccess.Read);
 
             try
             {
@@ -27,7 +27,7 @@ namespace DlaGrzesia.Serialization
 
         public void Save(GameState state)
         {
-            using var stream = new FileStream(FilePath, FileMode.Create);
+            using var stream = new FileStream(FilePath, FileMode.Create, FileAccess.Write);
 
             try
             {

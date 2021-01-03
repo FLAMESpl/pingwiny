@@ -1,5 +1,7 @@
-﻿using System;
+﻿using DlaGrzesia.Serialization;
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DlaGrzesia.Mechanics
 {
@@ -30,6 +32,20 @@ namespace DlaGrzesia.Mechanics
             items[currentIndex++] = item;
             if (currentIndex == items.Length)
                 currentIndex = 0;
+        }
+
+        public void Deserialize(Stream stream, Func<Stream, T> reader)
+        {
+            currentIndex = stream.ReadInt();
+            for (var i = 0; i < items.Length; i++)
+                items[i] = reader(stream);
+        }
+
+        public void Serialize(Stream stream, Action<Stream, T> writer)
+        {
+            stream.WriteInt(currentIndex);
+            foreach (var item in items)
+                writer(stream, item);
         }
     }
 }

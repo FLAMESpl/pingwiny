@@ -68,7 +68,9 @@ namespace DlaGrzesia
             gameState.Stage.Objects.Update(gameTime);
             gameState.Upgrades.Update(gameTime);
             uiElements.Update(gameTime);
-            gameState.Score.Update();
+
+            if (!environment.IsPaused)
+                gameState.Score.Update();
 
             environment.ExecuteAllCommands(gameState);
             environment.SaveGameIfRequested(gameState);

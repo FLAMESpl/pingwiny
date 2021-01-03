@@ -1,5 +1,7 @@
-﻿using DlaGrzesia.Serialization;
+﻿using DlaGrzesia.Mechanics;
+using DlaGrzesia.Serialization;
 using System.IO;
+using System.Linq;
 
 namespace DlaGrzesia.Scoring
 {
@@ -7,6 +9,9 @@ namespace DlaGrzesia.Scoring
     {
         public int Total { get; private set; }
         public int InCurrentFrame { get; private set; }
+        public decimal PerSecond => ((decimal)scoreGains.ReadAll().Sum()) / 60;
+
+        private CyclicList<int> scoreGains = new CyclicList<int>(60);
 
         public Score()
         {
@@ -42,6 +47,7 @@ namespace DlaGrzesia.Scoring
 
         public void Update()
         {
+            scoreGains.Write(InCurrentFrame);
             Total += InCurrentFrame;
             InCurrentFrame = 0;
         }
@@ -50,12 +56,14 @@ namespace DlaGrzesia.Scoring
         {
             stream.WriteInt(Total);
             stream.WriteInt(InCurrentFrame);
+            scoreGains.Serialize(stream, static (s, i) => s.WriteInt(i));
         }
 
         public void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             Total = stream.ReadInt();
             InCurrentFrame = stream.ReadInt();
+            scoreGains.Deserialize(stream, static s => s.ReadInt());
         }
     }
 }

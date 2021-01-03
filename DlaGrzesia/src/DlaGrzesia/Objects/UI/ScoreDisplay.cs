@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace DlaGrzesia.Objects.UI
 {
@@ -22,9 +23,20 @@ namespace DlaGrzesia.Objects.UI
             spriteBatch.Draw(texture, location.ToVector2(), null, Color.White, 0, default, 1f, SpriteEffects.None, LayerDepths.UI);
 
             if (showingDebugInput)
-                spriteBatch.DrawString(font, debugPoints, GetTextLocation(), Color.DarkMagenta);
+                spriteBatch.DrawString(font, debugPoints, GetTotalScoreLocation(), Color.DarkMagenta);
             else
-                spriteBatch.DrawString(font, GameState.Score.Total.ToString(), GetTextLocation(), Color.Black);
+                spriteBatch.DrawString(font, GameState.Score.Total.ToString(), GetTotalScoreLocation(), Color.Black);
+
+            spriteBatch.DrawString(
+                font,
+                $"{GameState.Score.PerSecond:0.000} / sec",
+                GetScorePerSecondLocation(),
+                Color.Black,
+                0,
+                Vector2.Zero,
+                0.5f,
+                SpriteEffects.None,
+                0);
         }
 
         public override void Update(GameTime elapsed)
@@ -51,8 +63,10 @@ namespace DlaGrzesia.Objects.UI
             font = resources.Fonts.Standard;
         }
 
-        private Vector2 GetTextLocation() => new Vector2(
+        private Vector2 GetTotalScoreLocation() => new Vector2(
             location.X + texture.Width + distanceBetweenTextAndImage, 
             location.Y);
+
+        private Vector2 GetScorePerSecondLocation() => GetTotalScoreLocation() + new Vector2(0, 64);
     }
 }
