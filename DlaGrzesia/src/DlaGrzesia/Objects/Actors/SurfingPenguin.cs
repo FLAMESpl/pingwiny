@@ -17,13 +17,9 @@ namespace DlaGrzesia.Objects.Actors
 
         public SurfingPenguin(
             Point location,
-            int duration,
-            int scorePerClick,
-            int scorePerDestroy) : base(
+            PenguinStats stats) : base(
                 location,
-                duration,
-                scorePerClick,
-                scorePerDestroy)
+                stats)
         {
         }
 

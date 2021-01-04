@@ -20,6 +20,12 @@ namespace DlaGrzesia.Serialization
             Upgrades = state.Upgrades;
         }
 
+        public void Reset(GameEnvironment environment)
+        {
+            Stage.ClearObjects();
+            Initialize(environment);
+        }
+
         public void Initialize(GameEnvironment environment)
         {
             Stage.Initialize(environment, this);

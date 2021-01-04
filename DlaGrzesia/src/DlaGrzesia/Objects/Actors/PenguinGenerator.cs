@@ -17,6 +17,10 @@ namespace DlaGrzesia.Objects.Actors
 
         private Textures textures;
 
+        public PenguinStats SlidingPenguin => new PenguinStats(CalculateDuration(10), 2, CalculateDestroyPoints(20));
+        public PenguinStats SurfingPenguin => new PenguinStats(int.MaxValue, 20, 0);
+        public PenguinStats WalkingPenguin => new PenguinStats(CalculateDuration(30), 1, CalculateDestroyPoints(5));
+
         private Rectangle StageBounds => GameState.Stage.Bounds;
 
         protected override void OnInitialized()
@@ -26,19 +30,22 @@ namespace DlaGrzesia.Objects.Actors
 
         public override void Update(GameTime elapsed)
         {
-            if (spawnCooldown.Elapsed)
+            if (!Environment.IsPaused)
             {
-                if (random.Next(0, 2) == 0)
-                    SpawnSliding();
-                else
-                    SpawnWalking();
+                if (spawnCooldown.Elapsed)
+                {
+                    if (random.Next(0, 2) == 0)
+                        SpawnSliding();
+                    else
+                        SpawnWalking();
+                }
+
+                if (surfingSpawnCooldown.Elapsed)
+                    SpawnSurfing();
+
+                spawnCooldown = spawnCooldown.Tick();
+                surfingSpawnCooldown = surfingSpawnCooldown.Tick();
             }
-
-            if (surfingSpawnCooldown.Elapsed)
-                SpawnSurfing();
-
-            spawnCooldown = spawnCooldown.Tick();
-            surfingSpawnCooldown = surfingSpawnCooldown.Tick();
         }
 
         public void DecreaseSurfingCooldown(float rate)
@@ -78,9 +85,7 @@ namespace DlaGrzesia.Objects.Actors
 
             Spawn(new SlidingPenguin(
                 new Point(horizontalPosition, verticalPosition),
-                CalculateDuration(10),
-                2,
-                CalculateDestroyPoints(20)));
+                SlidingPenguin));
         }
 
         private void SpawnSurfing()
@@ -91,9 +96,7 @@ namespace DlaGrzesia.Objects.Actors
 
             Spawn(new SurfingPenguin(
                 new Point(horizontalPosition, verticalPosition),
-                int.MaxValue,
-                20,
-                0));
+                SurfingPenguin));
         }
 
         private void SpawnWalking()
@@ -112,9 +115,7 @@ namespace DlaGrzesia.Objects.Actors
             Spawn(new WalkingPenguin(
                 orientation,
                 new Point(horizontalPosition, verticalPosition),
-                CalculateDuration(30),
-                1,
-                CalculateDestroyPoints(5)));
+                WalkingPenguin));
         }
 
         private void Spawn(PenguinBase penguin)

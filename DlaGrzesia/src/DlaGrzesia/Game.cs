@@ -65,6 +65,7 @@ namespace DlaGrzesia
             environment.Input.Update(Keyboard.GetState(), Mouse.GetState(Window));
 
             mechanicsElements.Update(gameTime);
+            gameState.Stage.PenguinGenerator.Update(gameTime);
             gameState.Stage.Objects.Update(gameTime);
             gameState.Upgrades.Update(gameTime);
             uiElements.Update(gameTime);
@@ -125,11 +126,12 @@ namespace DlaGrzesia
 
             uiElements.Add(upgradesGrid.CreateDisplays(5));
             uiElements.Add(new DebugOverlay());
+            uiElements.Add(new PenguinStatsDisplay(new Point(15, gameState.Stage.Bounds.Bottom + 15)));
         }
 
         private void InitializeStage()
         {
-            gameState.Initialize(environment);
+            gameState.Reset(environment);
         }
     }
 }

@@ -44,6 +44,7 @@ namespace DlaGrzesia
         }
 
         public bool IsControlKeyDown() => Keyboard.IsKeyDown(Keys.LeftControl) || Keyboard.IsKeyDown(Keys.RightControl);
+        public bool IsShiftKeyDown() => Keyboard.IsKeyDown(Keys.LeftShift) || Keyboard.IsKeyDown(Keys.RightShift);
         public bool IsKeyJustPressed(Keys key) => previousKeyboard.IsKeyUp(key) && Keyboard.IsKeyDown(key);
         public bool IsMouseLeftButtonJustPressed() => IsMouseButtonClicked(previousMouse.LeftButton, Mouse.LeftButton);
         public bool IsMouseRightButtonJustPressed() => IsMouseButtonClicked(previousMouse.RightButton, Mouse.RightButton);

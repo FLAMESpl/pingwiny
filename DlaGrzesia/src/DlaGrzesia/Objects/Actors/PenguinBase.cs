@@ -11,22 +11,18 @@ namespace DlaGrzesia.Objects.Actors
     {
         private SpriteFont font;
         private int remainingDuration;
-        private int scorePerClick;
-        private int scorePerDestroy;
         private bool spawnedParticleThisTick = false;
+        private PenguinStats stats;
 
         protected PenguinBase() { }
 
         public PenguinBase(
             Point location,
-            int duration,
-            int scorePerClick,
-            int scorePerDestroy)
+            PenguinStats stats)
         {
             Location = location;
-            remainingDuration = duration;
-            this.scorePerClick = scorePerClick;
-            this.scorePerDestroy = scorePerDestroy;
+            this.stats = stats;
+            remainingDuration = stats.Duration;
         }
 
         protected Point Location { get; set; }
@@ -61,11 +57,11 @@ namespace DlaGrzesia.Objects.Actors
             if (remainingDuration == 0)
             {
                 Destroy();
-                HandleClick(true, scorePerDestroy);
+                HandleClick(true, stats.PointsPerDestroy);
             }
             else
             {
-                HandleClick(false, scorePerClick);
+                HandleClick(false, stats.PointsPerClick);
             }
         }
 
@@ -98,8 +94,7 @@ namespace DlaGrzesia.Objects.Actors
         public override void Serialize(Stream stream, GameStateSerializer serializer)
         {
             stream.WriteInt(remainingDuration);
-            stream.WriteInt(scorePerClick);
-            stream.WriteInt(scorePerDestroy);
+            stream.WriteStruct(stats);
             stream.WriteStruct(Location);
 
             base.Serialize(stream, serializer);
@@ -108,8 +103,7 @@ namespace DlaGrzesia.Objects.Actors
         public override void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             remainingDuration = stream.ReadInt();
-            scorePerClick = stream.ReadInt();
-            scorePerDestroy = stream.ReadInt();
+            stats = stream.ReadStruct<PenguinStats>();
             Location = stream.ReadStruct<Point>();
 
             base.Deserialize(stream, serializer);

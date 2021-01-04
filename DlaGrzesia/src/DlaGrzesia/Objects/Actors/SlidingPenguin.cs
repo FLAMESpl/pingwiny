@@ -13,13 +13,9 @@ namespace DlaGrzesia.Objects.Actors
 
         public SlidingPenguin(
             Point location,
-            int duration,
-            int scorePerClick,
-            int scorePerDestroy) : base(
-                location, 
-                duration,
-                scorePerClick,
-                scorePerDestroy)
+            PenguinStats stats) : base(
+                location,
+                stats)
         {
         }
 

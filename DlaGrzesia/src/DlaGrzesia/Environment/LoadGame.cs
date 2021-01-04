@@ -10,8 +10,7 @@ namespace DlaGrzesia.Environment
             if (repository.FileExists)
             {
                 gameState.Load(repository.Load());
-                gameState.Stage.Objects.Initialize(environment, gameState);
-                gameState.Upgrades.Initialize(environment, gameState);
+                gameState.Initialize(environment);
             }
         }
     }

@@ -13,22 +13,29 @@ namespace DlaGrzesia
 
         public Rectangle Bounds { get; } = new Rectangle(15, 15, 1000, 700);
         public ObjectsCollection Objects { get; private set; } = new ObjectsCollection(false);
+        public PenguinGenerator PenguinGenerator { get; private set; } = new PenguinGenerator();
+
+        public void ClearObjects()
+        {
+            Objects = new ObjectsCollection(false);
+        }
 
         public void Initialize(GameEnvironment environment, GameState gameState)
         {
-            Objects = new ObjectsCollection(false);
             Objects.Initialize(environment, gameState);
-            Objects.Add(new PenguinGenerator());
+            PenguinGenerator.Initialize(environment, gameState);
         }
 
         public void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             Objects = (ObjectsCollection)serializer.ReadNext(stream);
+            PenguinGenerator = (PenguinGenerator)serializer.ReadNext(stream);
         }
 
         public void Serialize(Stream stream, GameStateSerializer serializer)
         {
             serializer.WriteNext(stream, Objects);
+            serializer.WriteNext(stream, PenguinGenerator);
         }
     }
 }
