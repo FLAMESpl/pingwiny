@@ -14,6 +14,7 @@ namespace DlaGrzesia
         public Rectangle Bounds { get; } = new Rectangle(15, 15, 1000, 700);
         public ObjectsCollection Objects { get; private set; } = new ObjectsCollection(false);
         public PenguinGenerator PenguinGenerator { get; private set; } = new PenguinGenerator();
+        public PenguinsController PenguinsController { get; private set; } = new PenguinsController();
 
         public void ClearObjects()
         {
@@ -30,12 +31,14 @@ namespace DlaGrzesia
         {
             Objects = (ObjectsCollection)serializer.ReadNext(stream);
             PenguinGenerator = (PenguinGenerator)serializer.ReadNext(stream);
+            PenguinsController = (PenguinsController)serializer.ReadNext(stream);
         }
 
         public void Serialize(Stream stream, GameStateSerializer serializer)
         {
             serializer.WriteNext(stream, Objects);
             serializer.WriteNext(stream, PenguinGenerator);
+            serializer.WriteNext(stream, PenguinsController);
         }
     }
 }

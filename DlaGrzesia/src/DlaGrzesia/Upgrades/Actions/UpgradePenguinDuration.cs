@@ -1,18 +1,22 @@
-﻿using DlaGrzesia.Serialization;
+﻿using DlaGrzesia.Environment;
+using DlaGrzesia.Serialization;
 
 namespace DlaGrzesia.Upgrades.Actions
 {
     public class UpgradePenguinDuration : IUpgradeAction
     {
-        public static readonly UpgradePenguinDuration Instance = new UpgradePenguinDuration();
+        private readonly int levels;
 
-        private UpgradePenguinDuration() { }
+        public UpgradePenguinDuration(int levels)
+        {
+            this.levels = levels;
+        }
 
-        public void Execute(GameState gameState)
+        public void Execute(GameState gameState, GameEnvironment gameEnvironment)
         {
             var generator = gameState.Stage.PenguinGenerator;
-            generator.IncreasePenguinsDuration(0.1f);
-            generator.IncreasePenguinsDestroyBonus(0.075f);
+            generator.IncreasePenguinsDuration(0.1f * levels);
+            generator.IncreasePenguinsDestroyBonus(0.075f * levels);
         }
     }
 }

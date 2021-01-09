@@ -36,7 +36,7 @@ namespace DlaGrzesia.Upgrades
                 new SurfingClicker(),
                 new SurfingFrequencyUpgrade(),
                 new PenguinDurationUpgrade(),
-                new Upgrade(250),
+                new BonusClickActivator(),
                 new Upgrade(500),
                 new Upgrade(1000),
                 new Upgrade(2000)
@@ -49,9 +49,19 @@ namespace DlaGrzesia.Upgrades
         {
             if (!Environment.IsPaused)
             {
-                var actions = upgrades.Where(static u => u.Bought).Select(static u => u.GetAction());
+                var actions = new List<IUpgradeAction>(UPGRADES_COUNT);
+
+                foreach (var upgrade in upgrades.Where(static u => u.Bought))
+                {
+                    upgrade.Notify(GameState.Events);
+                    var action = upgrade.Update();
+                    actions.Add(action);
+                }
+
                 foreach (var action in actions)
-                    action.Execute(GameState);
+                {
+                    action.Execute(GameState, Environment);
+                }
             }
         }
 

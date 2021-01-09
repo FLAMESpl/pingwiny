@@ -25,6 +25,7 @@ namespace DlaGrzesia.Objects.UI
 
         private Point PriceLocation => new Point(bounds.Right - 10, bounds.Bottom - 40);
         private Point CountLocation => new Point(bounds.Center.X + 75, bounds.Center.Y);
+        private Point DebugLocation => new Point(bounds.Right - 10, bounds.Top + 10);
         private Upgrade Upgrade => GameState.Upgrades[index];
         private Tileset Tileset => GameState.Upgrades.GetTileset(index);
 
@@ -40,8 +41,18 @@ namespace DlaGrzesia.Objects.UI
             {
                 var tileIndex = Environment.IsPaused ? 2 : justBoughtDuration.Elapsed ? 0 : 1;
                 spriteBatch.Draw(Tileset, bounds.Location, tileIndex, LayerDepths.UI);
-                spriteBatch.DrawStringAlignedToLeft(font, Upgrade.CurrentPrice.ToString(), PriceLocation, priceColor, 0.5f, LayerDepths.UI);
+
+                if (!Upgrade.IsMaxedOut)
+                    spriteBatch.DrawStringAlignedToLeft(font, Upgrade.CurrentPrice.ToString(), PriceLocation, priceColor, 0.5f, LayerDepths.UI);
+
                 spriteBatch.DrawCenteredString(font, Upgrade.Level.ToString(), CountLocation, Color.Black, 1, LayerDepths.UI);
+
+                if (Environment.IsDebugDataOn)
+                {
+                    var debugString = Upgrade.GetDebugData();
+                    if (!string.IsNullOrEmpty(debugString))
+                        spriteBatch.DrawStringAlignedToLeft(font, debugString, DebugLocation, Color.Black, 0.5f, LayerDepths.UI);
+                }
             }
         }
 
@@ -53,21 +64,17 @@ namespace DlaGrzesia.Objects.UI
             {
                 justBoughtDuration = justBoughtDuration.Tick();
 
-                if (canAfford && Environment.Input.TryConsumeLeftMouseButtonClick(bounds))
+                if (canAfford && !Upgrade.IsMaxedOut && Environment.Input.TryConsumeLeftMouseButtonClick(bounds))
                 {
-                    if (GameState.Score.TrySpend(Upgrade.CurrentPrice))
-                    {
-                        var levelUps =
-                            Environment.Input.IsControlKeyDown()
-                                ? Environment.Input.IsShiftKeyDown()
-                                    ? SHIFT_LEVELS_COUNT
-                                    : CTRL_LEVELS_COUNT
-                                : 1;
+                    var levelUps =
+                        Environment.Input.IsControlKeyDown()
+                            ? Environment.Input.IsShiftKeyDown()
+                                ? SHIFT_LEVELS_COUNT
+                                : CTRL_LEVELS_COUNT
+                            : 1;
 
-                        Upgrade.LevelUp(levelUps);
-                        Schedule(new SpawnObject(new HeartParticle(false, Environment.Input.Mouse.Position)));
-                    }
-
+                    Upgrade.LevelUp(levelUps, GameState.Score);
+                    Schedule(new SpawnObject(new HeartParticle(false, Environment.Input.Mouse.Position)));
                     justBoughtDuration = justBoughtDuration.Reset();
                 }
             }

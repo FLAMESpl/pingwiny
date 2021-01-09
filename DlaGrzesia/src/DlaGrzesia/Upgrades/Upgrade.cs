@@ -1,4 +1,6 @@
-﻿using DlaGrzesia.Serialization;
+﻿using DlaGrzesia.Environment;
+using DlaGrzesia.Scoring;
+using DlaGrzesia.Serialization;
 using DlaGrzesia.Upgrades.Actions;
 using System.IO;
 
@@ -21,33 +23,67 @@ namespace DlaGrzesia.Upgrades
         public int BasePrice { get; private set; }
         public int CurrentPrice { get; private set; }
         public bool Bought => Level > 0;
+        public bool IsMaxedOut => Level == 999;
 
-        public virtual IUpgradeAction GetAction()
+        protected int AwardedLevelsThisTick { get; private set; } = 0;
+
+        public void LevelUp(int amount, Score score)
         {
-            return NoOperation.Instance;
+            var boughtLevels = 0;
+
+            for (var i = 0; i < amount && !IsMaxedOut; i++)
+            {
+                if (score.TrySpend(CurrentPrice))
+                {
+                    AwardedLevelsThisTick++;
+                    Level++;
+                    CurrentPrice++;
+                    boughtLevels++;
+                }
+            }
+
+            OnLeveledUp(boughtLevels);
         }
 
-        public void LevelUp(int amount)
+        public void Notify(IEvents events)
         {
-            Level += amount;
-            CurrentPrice++;
-            OnLeveledUp();
+            OnNotified(events);
+        }
+
+        public IUpgradeAction Update()
+        {
+            var action = GetAction();
+            AwardedLevelsThisTick = 0;
+            return action;
         }
 
         public virtual void Deserialize(Stream stream, GameStateSerializer serializer)
         {
             Level = stream.ReadInt();
             CurrentPrice = stream.ReadInt();
+            AwardedLevelsThisTick = stream.ReadInt();
         }
 
         public virtual void Serialize(Stream stream, GameStateSerializer serializer)
         {
             stream.WriteInt(Level);
             stream.WriteInt(CurrentPrice);
+            stream.WriteInt(AwardedLevelsThisTick);
         }
 
-        protected virtual void OnLeveledUp()
+        public virtual string GetDebugData() => string.Empty;
+
+        protected virtual void OnLeveledUp(int levelsAwarded)
         {
+        }
+
+        protected virtual void OnNotified(IEvents events)
+        {
+        }
+
+        protected virtual IUpgradeAction GetAction()
+        {
+            return NoOperation.Instance;
         }
     }
 }

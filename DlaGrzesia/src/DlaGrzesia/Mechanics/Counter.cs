@@ -1,34 +1,52 @@
-﻿using System.Diagnostics;
+﻿using System;
 
 namespace DlaGrzesia.Mechanics
 {
     public struct Counter
     {
-        public Counter(int startValue, int currentValue, bool cyclic)
+        private Counter(int startValue, int currentValue, int laps, bool cyclic, int tickRate)
         {
             StartValue = startValue;
             CurrentValue = currentValue;
+            Laps = laps;
             Cyclic = cyclic;
+            TickRate = tickRate;
         }
 
         public int CurrentValue { get; private set; }
         public int CurrentValueReversed => StartValue - CurrentValue;
-        public bool Cyclic { get; }
+        public bool Cyclic { get; private set; }
+        public int Laps { get; private set; }
         public int StartValue { get; private set; }
+        public int TickRate { get; private set; }
 
-        public bool Elapsed => CurrentValue == 0;
+        public bool Elapsed => Laps > 0;
 
         public Counter ToCyclic()
         {
-            return new Counter(StartValue, CurrentValue, true);
+            Cyclic = true;
+            return this;
         }
 
         public Counter Tick()
         {
-            if (CurrentValue > 0)
-                CurrentValue--;
-            else if (Cyclic)
-                CurrentValue = StartValue;
+            if (Elapsed && Cyclic)
+            {
+                Laps = 0;
+            }
+
+            if (!Elapsed)
+            {
+                var nextValue = CurrentValue - TickRate;
+
+                while (nextValue < 1)
+                {
+                    Laps++;
+                    nextValue += StartValue;
+                }
+
+                CurrentValue = nextValue;
+            }
 
             return this;
         }
@@ -36,6 +54,7 @@ namespace DlaGrzesia.Mechanics
         public Counter Reset()
         {
             CurrentValue = StartValue;
+            Laps = 0;
             return this;
         }
 
@@ -45,10 +64,20 @@ namespace DlaGrzesia.Mechanics
             return this;
         }
 
+        public Counter IncreaseTickRate(int rate) => WithTickRate(TickRate + rate);
+
+        public Counter WithTickRate(int rate)
+        {
+            if (rate < 1) throw new ArgumentException("Cannot be negative", nameof(rate));
+
+            TickRate = rate;
+            return this;
+        }
+
         public override string ToString() => CurrentValue.ToString();
 
-        public static Counter NewStarted(int value) => new Counter(value, value, false);
-        public static Counter NewElapsed() => new Counter(0, 0, false);
-        public static Counter NewElapsed(int maxValue) => new Counter(maxValue, 0, false);
+        public static Counter NewStarted(int value) => new Counter(value, value, 0, false, 1);
+        public static Counter NewElapsed() => NewElapsed(0);
+        public static Counter NewElapsed(int maxValue) => new Counter(maxValue, 0, 1, false, 1);
     }
 }

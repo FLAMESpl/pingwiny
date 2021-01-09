@@ -18,5 +18,16 @@ namespace DlaGrzesia.Mechanics
             }
             return result;
         }
+
+        public static void Shuffle<T>(this Random random, ref Span<T> source)
+        {
+            for (var n = source.Length - 1; n > 0; n--)
+            {
+                var k = random.Next(n + 1);
+                var value = source[k];
+                source[k] = source[n];
+                source[n] = value;
+            }
+        }
     }
 }

@@ -1,50 +1,44 @@
 ﻿using DlaGrzesia.Mechanics;
 using DlaGrzesia.Serialization;
 using DlaGrzesia.Upgrades.Actions;
-using System;
 using System.IO;
 
 namespace DlaGrzesia.Upgrades
 {
     public class BasicClicker : Upgrade
     {
-        private const int BASE_COOLDOWN = 100;
-        private const float COOLDOWN_REDUCTION_RATE = 0.05f;
-        private Counter activationCooldown = Counter.NewStarted(BASE_COOLDOWN).ToCyclic();
+        private const int TICK_RATE_INCREMENT = 5;
+        private Counter activationCounter = Counter.NewStarted(60).WithTickRate(TICK_RATE_INCREMENT).ToCyclic();
 
         public BasicClicker() : base(1)
         {
         }
 
-        public override IUpgradeAction GetAction()
+        protected override IUpgradeAction GetAction()
         {
-            activationCooldown.Tick();
-            return activationCooldown.Elapsed
-                ? ClickRandomNonSurfingPenguin.Instance
+            activationCounter.Tick();
+            return activationCounter.Elapsed
+                ? new ClickRandomNonSurfingPenguin(activationCounter.Laps)
                 : NoOperation.Instance;
         }
 
         public override void Deserialize(Stream stream, GameStateSerializer serializer)
         {
-            activationCooldown = stream.ReadStruct<Counter>();
+            activationCounter = stream.ReadStruct<Counter>();
             base.Deserialize(stream, serializer);
         }
 
         public override void Serialize(Stream stream, GameStateSerializer serializer)
         {
-            stream.WriteStruct(activationCooldown);
+            stream.WriteStruct(activationCounter);
             base.Serialize(stream, serializer);
         }
 
-        protected override void OnLeveledUp()
-        {
-            activationCooldown.StartFrom(GetCurrentCooldown());
-        }
+        public override string GetDebugData() => activationCounter.CurrentValue.ToString();
 
-        private int GetCurrentCooldown()
+        protected override void OnLeveledUp(int levels)
         {
-            var reducedCooldown = BASE_COOLDOWN * Math.Pow(1 - COOLDOWN_REDUCTION_RATE, Level - 1);
-            return reducedCooldown > 1 ? (int)Math.Round(reducedCooldown) : 1;
+            activationCounter.IncreaseTickRate(TICK_RATE_INCREMENT * levels);
         }
     }
 }

@@ -1,18 +1,20 @@
-﻿using DlaGrzesia.Serialization;
+﻿using DlaGrzesia.Environment;
+using DlaGrzesia.Serialization;
 
 namespace DlaGrzesia.Upgrades.Actions
 {
     public class UpgradeSurfingFrequency : IUpgradeAction
     {
-        public static readonly UpgradeSurfingFrequency Instance = new UpgradeSurfingFrequency();
+        private readonly int levels;
 
-        private UpgradeSurfingFrequency()
+        public UpgradeSurfingFrequency(int levels)
         {
+            this.levels = levels;
         }
 
-        public void Execute(GameState gameState)
+        public void Execute(GameState gameState, GameEnvironment environment)
         {
-            gameState.Stage.PenguinGenerator.DecreaseSurfingCooldown(0.05f);
+            gameState.Stage.PenguinGenerator.DecreaseSurfingCooldown(0.05f * levels);
         }
     }
 }

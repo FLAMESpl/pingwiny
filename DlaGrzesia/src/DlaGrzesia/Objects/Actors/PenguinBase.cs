@@ -3,6 +3,7 @@ using DlaGrzesia.Objects.Particles;
 using DlaGrzesia.Serialization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.IO;
 
 namespace DlaGrzesia.Objects.Actors
@@ -50,19 +51,24 @@ namespace DlaGrzesia.Objects.Actors
             }
         }
 
-        public void Click()
-        {
-            remainingDuration--;
+        public void Click() => Click(1, 1);
 
-            if (remainingDuration == 0)
+        public void Click(int strength, decimal scoreBonus)
+        {
+            int damageDone;
+
+            if (strength > remainingDuration)
             {
-                Destroy();
-                HandleClick(true, stats.PointsPerDestroy);
+                damageDone = remainingDuration;
+                remainingDuration = 0;
             }
             else
             {
-                HandleClick(false, stats.PointsPerClick);
+                damageDone = strength;
+                remainingDuration -= strength;
             }
+
+            HandleClick(remainingDuration == 0, damageDone, scoreBonus);
         }
 
         public override void Update(GameTime gameTime)
@@ -70,7 +76,14 @@ namespace DlaGrzesia.Objects.Actors
             spawnedParticleThisTick = false;
 
             if (Environment.Input.TryConsumeLeftMouseButtonClick(Bounds))
-                Click();
+            {
+                var controller = GameState.Stage.PenguinsController;
+
+                if (controller.TryConsumeBonusClick(GameState.Events, out var clicks, out var bonus))
+                    Click(clicks, bonus);
+                else
+                    Click();
+            }
             
             if (GameState.Stage.Bounds.Intersects(Bounds) == false)
                 Destroy();
@@ -81,13 +94,20 @@ namespace DlaGrzesia.Objects.Actors
             font = Environment.Resources.Fonts.Standard;
         }
 
-        private void HandleClick(bool yellowParticle, int score)
+        private void HandleClick(bool destroyed, int damage, decimal bonus)
         {
-            GameState.Score.Increase(score);
+            if (destroyed)
+                Destroy();
+
+            var baseScore = damage * stats.PointsPerClick + (destroyed ? stats.PointsPerDestroy : 0);
+            var totalScore = (int)Math.Ceiling(baseScore * bonus);
+
+            GameState.Score.Increase(totalScore);
+
             if (!spawnedParticleThisTick)
             {
                 spawnedParticleThisTick = true;
-                Schedule(new SpawnObject(new HeartParticle(yellowParticle, Location)));
+                Schedule(new SpawnObject(new HeartParticle(destroyed, Location)));
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using DlaGrzesia.Serialization;
+﻿using DlaGrzesia.Environment;
+using DlaGrzesia.Serialization;
 
 namespace DlaGrzesia.Upgrades.Actions
 {
@@ -7,7 +8,7 @@ namespace DlaGrzesia.Upgrades.Actions
         public static readonly NoOperation Instance = new NoOperation();
         private NoOperation() { }
 
-        public void Execute(GameState gameState)
+        public void Execute(GameState gameState, GameEnvironment environment)
         {
         }
     }

@@ -10,7 +10,13 @@ namespace DlaGrzesia.Environment
     {
     }
 
-    public class Events : ISerializableGameState
+    public interface IEvents
+    {
+        IEnumerable<TEvent> Get<TEvent>() where TEvent : IEvent;
+        bool TryGetFirst<TEvent>(out TEvent @event) where TEvent : IEvent;
+    }
+
+    public class Events : IEvents, ISerializableGameState
     {
         private Dictionary<Type, List<IEvent>> scheduledEvents = new Dictionary<Type, List<IEvent>>();
         private Dictionary<Type, List<IEvent>> currentEvents = new Dictionary<Type, List<IEvent>>();
