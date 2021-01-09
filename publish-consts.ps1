@@ -1,6 +1,7 @@
 $root = $PSScriptRoot
 $publishDir = "$root\publish"
 $compressionAssembly = "System.IO.Compression.FileSystem"
+$targetProject = "DlaGrzesia\src\DlaGrzesia\DlaGrzesia.csproj"
 
 function PublishGame
 {
@@ -20,11 +21,11 @@ function PublishGame
 
     if ($selfContained.IsPresent)
     {
-        dotnet publish "$root\DlaGrzesia" --nologo -o $outputPath --configuration Release -p:PublishSingleFile=true --runtime win-x64
+        dotnet publish "$root\$targetProject" --nologo -o $outputPath --configuration Release -p:PublishSingleFile=true --runtime win-x64
     }
     else
     {
-        dotnet publish "$root\DlaGrzesia" --nologo -o $outputPath --configuration Release --no-self-contained -p:PublishSingleFile=true --runtime win-x64
+        dotnet publish "$root\$targetProject" --nologo -o $outputPath --configuration Release --no-self-contained -p:PublishSingleFile=true --runtime win-x64
     }
 
     Remove-Item -Path "$outputPath\*.pdb"
